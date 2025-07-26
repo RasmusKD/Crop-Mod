@@ -17,6 +17,8 @@
   "text.autoconfig.cropmod.option.onlyHarvestFullyGrown.@Tooltip": "If enabled, only fully grown crops can be harvested.",
   "text.autoconfig.cropmod.option.requireHoeToBreakCrops": "Require Hoe to Break Crops",
   "text.autoconfig.cropmod.option.requireHoeToBreakCrops.@Tooltip": "If enabled, the player must be holding a hoe to break crops.",
+  "text.autoconfig.cropmod.option.showProtectionParticles": "Show Protection Particles",
+  "text.autoconfig.cropmod.option.showProtectionParticles.@Tooltip": "If enabled, shows magical barrier particles when crop harvesting is blocked.",
   "text.autoconfig.cropmod.option.crops": "Crop Settings",
   "text.autoconfig.cropmod.option.wheatEnabled": "Enable Wheat",
   "text.autoconfig.cropmod.option.wheatEnabled.@Tooltip": "Enable all CropMod features for wheat crops.",

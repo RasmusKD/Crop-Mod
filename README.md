@@ -32,12 +32,18 @@ Beyond mcMMO compatibility, CropMod adds general-purpose farming improvements th
 
 ### 📷 **Camera Snap** *(Optional)*
 - **Precision Farming**: Automatically snaps camera to nearest 90° angle
-- **Two Modes**: 
+- **Two Modes**:
   - **Always**: Snap when looking at crops
   - **Break**: Snap only when harvesting
 - **Direction Options**:
   - **Always**: Snap regardless of position
   - **Same Row**: Only snap when aligned with crop rows
+
+### ✨ **Protection Particles** *(Optional)*
+- **Visual Feedback**: Shows magical barrier particles when crop harvesting is blocked
+- **Height-Adaptive**: Barrier height automatically scales with crop growth stage
+- **Elegant Design**: Clean enchantment particles form corner posts and connecting edges
+- **Smart Scaling**: Young crops get small barriers, mature crops get full-height barriers
 
 ### ⌨️ **Keybinds**
 - **P Key**: Toggle crop protection on/off
@@ -55,6 +61,7 @@ Beyond mcMMO compatibility, CropMod adds general-purpose farming improvements th
 - **Crop Protection**: ✅ Enabled
 - **Camera Snap**: ❌ Disabled
 - **Hoe Requirement**: ❌ Disabled
+- **Protection Particles**: ❌ Disabled
 - **Only Harvest Fully Grown**: ✅ Enabled
 - **Seed Threshold**: 67 seeds
 - **All Crop Types**: ✅ Enabled
@@ -69,7 +76,6 @@ Beyond mcMMO compatibility, CropMod adds general-purpose farming improvements th
 
 ## Dependencies
 
-- **Minecraft**
 - **Fabric Loader**
 - **Fabric API**: Required
 - **Cloth Config**: Required (for configuration GUI)
@@ -80,6 +86,7 @@ Beyond mcMMO compatibility, CropMod adds general-purpose farming improvements th
 - **mcMMO Players**: Protect your seed investment while auto-replanting
 - **Farm Builders**: Avoid accidentally destroying immature crops
 - **Precision Farmers**: Use camera snap for perfectly aligned crop rows
+- **Visual Farmers**: Enable protection particles for clear feedback when harvesting is blocked
 - **Selective Harvesting**: Choose exactly which crops to apply features to
 
 ---

@@ -12,6 +12,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.HoeItem;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -127,6 +129,9 @@ public class CropBlockMixin {
 
         // Hoe requirement logic
         if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+            if (CropModConfig.get().showProtectionParticles) {
+                spawnProtectionParticles(client, blockPos);
+            }
             cir.cancel();
             return;
         }
@@ -142,12 +147,18 @@ public class CropBlockMixin {
 
         // Crop protection logic
         if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
+            if (CropModConfig.get().showProtectionParticles) {
+                spawnProtectionParticles(client, blockPos);
+            }
             cir.cancel();
             return;
         }
 
         // Only harvest fully grown logic
         if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
+            if (CropModConfig.get().showProtectionParticles) {
+                spawnProtectionParticles(client, blockPos);
+            }
             cir.cancel();
             return;
         }
@@ -241,5 +252,87 @@ public class CropBlockMixin {
         float yaw = player.getYaw();
         float snappedYaw = Math.round(yaw / 90.0f) * 90.0f;
         player.setYaw(snappedYaw);
+    }
+
+    private void spawnProtectionParticles(MinecraftClient client, BlockPos blockPos) {
+        if (client.world == null || client.particleManager == null) return;
+
+        // Create a simple, clean barrier effect that adapts to crop height
+        double x = blockPos.getX();
+        double y = blockPos.getY();
+        double z = blockPos.getZ();
+
+        // Get the actual height of the crop
+        BlockState blockState = client.world.getBlockState(blockPos);
+        double cropHeight = getCropHeight(blockState);
+
+        // Four corner posts that match the crop height
+        for (double h = 0; h <= cropHeight; h += 0.2) {
+            // Northwest corner
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x, y + h, z, 0, 0, 0);
+            // Northeast corner
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x + 1, y + h, z, 0, 0, 0);
+            // Southwest corner
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x, y + h, z + 1, 0, 0, 0);
+            // Southeast corner
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x + 1, y + h, z + 1, 0, 0, 0);
+        }
+
+        // Top edge particles at the crop's actual height
+        double topHeight = y + cropHeight;
+
+        // North edge
+        for (double w = 0.2; w <= 0.8; w += 0.3) {
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x + w, topHeight, z, 0, 0, 0);
+        }
+        // South edge
+        for (double w = 0.2; w <= 0.8; w += 0.3) {
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x + w, topHeight, z + 1, 0, 0, 0);
+        }
+        // West edge
+        for (double w = 0.2; w <= 0.8; w += 0.3) {
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x, topHeight, z + w, 0, 0, 0);
+        }
+        // East edge
+        for (double w = 0.2; w <= 0.8; w += 0.3) {
+            client.particleManager.addParticle(ParticleTypes.ENCHANT, x + 1, topHeight, z + w, 0, 0, 0);
+        }
+
+        // Play a subtle sound effect
+        if (client.player != null && client.world != null) {
+            client.world.playSound(
+                    client.player,
+                    blockPos.getX() + 0.5,
+                    blockPos.getY() + 0.5,
+                    blockPos.getZ() + 0.5,
+                    SoundEvents.BLOCK_NOTE_BLOCK_BASS,
+                    net.minecraft.sound.SoundCategory.BLOCKS,
+                    0.3f,
+                    0.5f
+            );
+        }
+    }
+
+    private double getCropHeight(BlockState blockState) {
+        Block block = blockState.getBlock();
+
+        if (block instanceof CropBlock) {
+            CropBlock cropBlock = (CropBlock) block;
+            int age = cropBlock.getAge(blockState);
+            int maxAge = cropBlock.getMaxAge();
+            // Scale height from 0.2 to 1.0 based on growth
+            return 0.2 + (0.8 * ((double) age / maxAge));
+        } else if (block instanceof NetherWartBlock) {
+            int age = blockState.get(NetherWartBlock.AGE);
+            // Scale height from 0.3 to 0.9 for nether wart
+            return 0.3 + (0.6 * ((double) age / 3));
+        } else if (block instanceof CocoaBlock) {
+            // Cocoa beans grow on the side of blocks, use a consistent smaller height
+            // regardless of growth stage since they don't grow "up" like regular crops
+            return 1;
+        }
+
+        // Default height for unknown crops
+        return 0.8;
     }
 }
