@@ -37,5 +37,7 @@
   "text.autoconfig.cropmod.enum.CameraSnapMode.ALWAYS": "Always",
   "text.autoconfig.cropmod.enum.CameraSnapMode.BREAK": "Break",
   "text.autoconfig.cropmod.enum.CameraSnapDirectionMode.ALWAYS": "Always",
-  "text.autoconfig.cropmod.enum.CameraSnapDirectionMode.SAME_ROW": "Same Row"
+  "text.autoconfig.cropmod.enum.CameraSnapDirectionMode.SAME_ROW": "Same Row",
+  "text.autoconfig.cropmod.option.playProtectionSounds": "Play Protection Sounds",
+  "text.autoconfig.cropmod.option.playProtectionSounds.@Tooltip": "If enabled, plays sound effects when crop harvesting is blocked."
 }

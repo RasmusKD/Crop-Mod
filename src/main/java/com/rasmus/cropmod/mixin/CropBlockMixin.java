@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.block.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -31,7 +32,9 @@ import java.util.Map;
 @Mixin(MinecraftClient.class)
 public class CropBlockMixin {
 
+    @Unique
     private static final Map<Block, Item> CROP_SEED_MAP = new HashMap<>();
+    @Unique
     private static final Map<Block, String> CROP_CONFIG_KEYS = new HashMap<>();
 
     static {
@@ -65,44 +68,42 @@ public class CropBlockMixin {
         BlockState blockState = client.world.getBlockState(blockPos);
         Block block = blockState.getBlock();
 
-        // First check if this crop is enabled at all
-        if (!isCropEnabled(block)) {
-            return; // Don't apply any CropMod features to disabled crops
-        }
-
-        // Hoe requirement logic
-        if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
-            ci.cancel();
-            return;
-        }
-
-        // Camera snap logic
-        if (CropModConfig.get().cameraSnapEnabled &&
-                CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.ALWAYS) {
-            if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
-                    isFacingSameRow(player, blockPos)) {
-                snapCameraToNearest90Degrees(player);
+        // Only apply CropMod features to enabled crops
+        if (isCropEnabled(block)) {
+            // Hoe requirement logic
+            if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+                ci.cancel();
+                return;
             }
-        }
 
-        // Crop protection logic
-        if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
-            ci.cancel();
-            return;
-        }
+            // Camera snap logic
+            if (CropModConfig.get().cameraSnapEnabled &&
+                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.ALWAYS) {
+                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+                        isFacingSameRow(player, blockPos)) {
+                    snapCameraToNearest90Degrees(player);
+                }
+            }
 
-        // Only harvest fully grown logic
-        if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
-            ci.cancel();
-            return;
-        }
+            // Crop protection logic
+            if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
+                ci.cancel();
+                return;
+            }
 
-        // Camera snap on break
-        if (breaking && CropModConfig.get().cameraSnapEnabled &&
-                CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
-            if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
-                    isFacingSameRow(player, blockPos)) {
-                snapCameraToNearest90Degrees(player);
+            // Only harvest fully grown logic
+            if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
+                ci.cancel();
+                return;
+            }
+
+            // Camera snap on break
+            if (breaking && CropModConfig.get().cameraSnapEnabled &&
+                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
+                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+                        isFacingSameRow(player, blockPos)) {
+                    snapCameraToNearest90Degrees(player);
+                }
             }
         }
     }
@@ -122,48 +123,46 @@ public class CropBlockMixin {
         BlockState blockState = client.world.getBlockState(blockPos);
         Block block = blockState.getBlock();
 
-        // First check if this crop is enabled at all
-        if (!isCropEnabled(block)) {
-            return; // Don't apply any CropMod features to disabled crops
-        }
-
-        // Hoe requirement logic
-        if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
-            if (CropModConfig.get().showProtectionParticles) {
-                spawnProtectionParticles(client, blockPos);
+        // Only apply CropMod features to enabled crops
+        if (isCropEnabled(block)) {
+            // Hoe requirement logic
+            if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+                if (CropModConfig.get().showProtectionParticles) {
+                    spawnProtectionParticles(client, blockPos);
+                }
+                cir.cancel();
+                return;
             }
-            cir.cancel();
-            return;
-        }
 
-        // Camera snap on break
-        if (CropModConfig.get().cameraSnapEnabled &&
-                CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
-            if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
-                    isFacingSameRow(player, blockPos)) {
-                snapCameraToNearest90Degrees(player);
+            // Camera snap on break
+            if (CropModConfig.get().cameraSnapEnabled &&
+                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
+                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+                        isFacingSameRow(player, blockPos)) {
+                    snapCameraToNearest90Degrees(player);
+                }
             }
-        }
 
-        // Crop protection logic
-        if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
-            if (CropModConfig.get().showProtectionParticles) {
-                spawnProtectionParticles(client, blockPos);
+            // Crop protection logic
+            if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
+                if (CropModConfig.get().showProtectionParticles) {
+                    spawnProtectionParticles(client, blockPos);
+                }
+                cir.cancel();
+                return;
             }
-            cir.cancel();
-            return;
-        }
 
-        // Only harvest fully grown logic
-        if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
-            if (CropModConfig.get().showProtectionParticles) {
-                spawnProtectionParticles(client, blockPos);
+            // Only harvest fully grown logic
+            if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
+                if (CropModConfig.get().showProtectionParticles) {
+                    spawnProtectionParticles(client, blockPos);
+                }
+                cir.cancel();
             }
-            cir.cancel();
-            return;
         }
     }
 
+    @Unique
     private boolean isHoldingHoe(PlayerEntity player) {
         ItemStack mainHandStack = player.getMainHandStack();
         ItemStack offHandStack = player.getOffHandStack();
@@ -172,6 +171,7 @@ public class CropBlockMixin {
                 (offHandStack.getItem() instanceof HoeItem);
     }
 
+    @Unique
     private boolean shouldCancelAttack(PlayerEntity player, BlockState blockState) {
         Block block = blockState.getBlock();
         Item correspondingSeed = CROP_SEED_MAP.get(block);
@@ -193,6 +193,7 @@ public class CropBlockMixin {
         return true;
     }
 
+    @Unique
     private boolean isCropEnabled(Block block) {
         CropModConfig config = CropModConfig.get();
         String configKey = CROP_CONFIG_KEYS.get(block);
@@ -200,29 +201,22 @@ public class CropBlockMixin {
             return false; // Not a supported crop
         }
 
-        switch (configKey) {
-            case "wheatEnabled":
-                return config.wheatEnabled;
-            case "carrotsEnabled":
-                return config.carrotsEnabled;
-            case "potatoesEnabled":
-                return config.potatoesEnabled;
-            case "beetrootsEnabled":
-                return config.beetrootsEnabled;
-            case "netherWartEnabled":
-                return config.netherWartEnabled;
-            case "cocoaEnabled":
-                return config.cocoaEnabled;
-            default:
-                return false;
-        }
+        return switch (configKey) {
+            case "wheatEnabled" -> config.wheatEnabled;
+            case "carrotsEnabled" -> config.carrotsEnabled;
+            case "potatoesEnabled" -> config.potatoesEnabled;
+            case "beetrootsEnabled" -> config.beetrootsEnabled;
+            case "netherWartEnabled" -> config.netherWartEnabled;
+            case "cocoaEnabled" -> config.cocoaEnabled;
+            default -> false;
+        };
     }
 
+    @Unique
     private boolean isCropNotFullyGrown(BlockState blockState) {
         Block block = blockState.getBlock();
 
-        if (block instanceof CropBlock) {
-            CropBlock cropBlock = (CropBlock) block;
+        if (block instanceof CropBlock cropBlock) {
             return !cropBlock.isMature(blockState);
         } else if (block instanceof NetherWartBlock) {
             return blockState.get(NetherWartBlock.AGE) < 3;
@@ -233,27 +227,25 @@ public class CropBlockMixin {
         return false;
     }
 
+    @Unique
     private boolean isFacingSameRow(PlayerEntity player, BlockPos blockPos) {
         Direction playerFacing = player.getHorizontalFacing();
         BlockPos playerPos = player.getBlockPos();
-        switch (playerFacing) {
-            case NORTH:
-            case SOUTH:
-                return playerPos.getX() == blockPos.getX();
-            case WEST:
-            case EAST:
-                return playerPos.getZ() == blockPos.getZ();
-            default:
-                return false;
-        }
+        return switch (playerFacing) {
+            case NORTH, SOUTH -> playerPos.getX() == blockPos.getX();
+            case WEST, EAST -> playerPos.getZ() == blockPos.getZ();
+            default -> false;
+        };
     }
 
+    @Unique
     private void snapCameraToNearest90Degrees(PlayerEntity player) {
         float yaw = player.getYaw();
         float snappedYaw = Math.round(yaw / 90.0f) * 90.0f;
         player.setYaw(snappedYaw);
     }
 
+    @Unique
     private void spawnProtectionParticles(MinecraftClient client, BlockPos blockPos) {
         if (client.world == null || client.particleManager == null) return;
 
@@ -299,7 +291,7 @@ public class CropBlockMixin {
         }
 
         // Play a subtle sound effect
-        if (client.player != null && client.world != null) {
+        if (client.player != null && client.world != null && CropModConfig.get().playProtectionSounds) {
             client.world.playSound(
                     client.player,
                     blockPos.getX() + 0.5,
@@ -313,11 +305,11 @@ public class CropBlockMixin {
         }
     }
 
+    @Unique
     private double getCropHeight(BlockState blockState) {
         Block block = blockState.getBlock();
 
-        if (block instanceof CropBlock) {
-            CropBlock cropBlock = (CropBlock) block;
+        if (block instanceof CropBlock cropBlock) {
             int age = cropBlock.getAge(blockState);
             int maxAge = cropBlock.getMaxAge();
             // Scale height from 0.2 to 1.0 based on growth
@@ -333,6 +325,6 @@ public class CropBlockMixin {
         }
 
         // Default height for unknown crops
-        return 0.8;
+        return 1;
     }
 }

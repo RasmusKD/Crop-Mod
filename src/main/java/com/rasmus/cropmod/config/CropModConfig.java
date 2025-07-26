@@ -12,17 +12,6 @@ public class CropModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean cropProtectionEnabled = true;
 
-    @ConfigEntry.Gui.Tooltip
-    public boolean cameraSnapEnabled = false; // Changed to false by default
-
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    @ConfigEntry.Gui.Tooltip
-    public CameraSnapMode cameraSnapMode = CameraSnapMode.BREAK;
-
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    @ConfigEntry.Gui.Tooltip
-    public CameraSnapDirectionMode cameraSnapDirectionMode = CameraSnapDirectionMode.SAME_ROW;
-
     @ConfigEntry.BoundedDiscrete(min = 0, max = 640)
     @ConfigEntry.Gui.Tooltip
     public int itemThreshold = 67;
@@ -31,10 +20,25 @@ public class CropModConfig implements ConfigData {
     public boolean onlyHarvestFullyGrown = true;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean requireHoeToBreakCrops = false; // New setting: off by default
+    public boolean requireHoeToBreakCrops = false;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean showProtectionParticles = false; // New setting: off by default
+    public boolean showProtectionParticles = false;
+
+    @ConfigEntry.Gui.Tooltip
+    public boolean playProtectionSounds = true;
+
+    // Camera snap settings moved to bottom
+    @ConfigEntry.Gui.Tooltip
+    public boolean cameraSnapEnabled = false;
+
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip
+    public CameraSnapMode cameraSnapMode = CameraSnapMode.BREAK;
+
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    @ConfigEntry.Gui.Tooltip
+    public CameraSnapDirectionMode cameraSnapDirectionMode = CameraSnapDirectionMode.SAME_ROW;
 
     // Individual crop settings (no longer nested)
     @ConfigEntry.Category("crops")
