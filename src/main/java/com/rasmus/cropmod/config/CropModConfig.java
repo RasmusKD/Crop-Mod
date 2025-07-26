@@ -13,7 +13,7 @@ public class CropModConfig implements ConfigData {
     public boolean cropProtectionEnabled = true;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean cameraSnapEnabled = true;
+    public boolean cameraSnapEnabled = false;
 
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     @ConfigEntry.Gui.Tooltip
@@ -29,6 +29,9 @@ public class CropModConfig implements ConfigData {
 
     @ConfigEntry.Gui.Tooltip
     public boolean onlyHarvestFullyGrown = true;
+
+    @ConfigEntry.Gui.Tooltip
+    public boolean requireHoeToBreakCrops = false;
 
     // Individual crop settings (no longer nested)
     @ConfigEntry.Category("crops")

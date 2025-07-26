@@ -11,6 +11,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.HoeItem;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -67,6 +68,12 @@ public class CropBlockMixin {
             return; // Don't apply any CropMod features to disabled crops
         }
 
+        // Hoe requirement logic
+        if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+            ci.cancel();
+            return;
+        }
+
         // Camera snap logic
         if (CropModConfig.get().cameraSnapEnabled &&
                 CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.ALWAYS) {
@@ -118,6 +125,12 @@ public class CropBlockMixin {
             return; // Don't apply any CropMod features to disabled crops
         }
 
+        // Hoe requirement logic
+        if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+            cir.cancel();
+            return;
+        }
+
         // Camera snap on break
         if (CropModConfig.get().cameraSnapEnabled &&
                 CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
@@ -138,6 +151,14 @@ public class CropBlockMixin {
             cir.cancel();
             return;
         }
+    }
+
+    private boolean isHoldingHoe(PlayerEntity player) {
+        ItemStack mainHandStack = player.getMainHandStack();
+        ItemStack offHandStack = player.getOffHandStack();
+
+        return (mainHandStack.getItem() instanceof HoeItem) ||
+                (offHandStack.getItem() instanceof HoeItem);
     }
 
     private boolean shouldCancelAttack(PlayerEntity player, BlockState blockState) {
