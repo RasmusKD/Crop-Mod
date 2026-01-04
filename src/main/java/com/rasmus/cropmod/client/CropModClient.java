@@ -8,43 +8,46 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class CropModClient implements ClientModInitializer {
-    private static KeyBinding toggleProtectionKeyBinding;
+    private static KeyBinding toggleModKeyBinding;
     private static KeyBinding toggleCameraSnapKeyBinding;
+
+    // Create a custom category for CropMod keybindings
+    private static final KeyBinding.Category CROPMOD_CATEGORY = KeyBinding.Category.create(
+            Identifier.of("cropmod", "category"));
 
     @Override
     public void onInitializeClient() {
-        // Don't register config here - it's already registered in the main mod initializer
+        // Don't register config here - it's already registered in the main mod
+        // initializer
 
         // Register key bindings
-        toggleProtectionKeyBinding = KeyBindingHelper.registerKeyBinding(
+        toggleModKeyBinding = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding(
-                        "key.cropmod.toggleProtection",
+                        "key.cropmod.toggleMod",
                         InputUtil.Type.KEYSYM,
-                        80, // P key
-                        "key.category.cropmod"
-                )
-        );
+                        66, // B key
+                        CROPMOD_CATEGORY));
 
         toggleCameraSnapKeyBinding = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding(
                         "key.cropmod.toggleCameraSnap",
                         InputUtil.Type.KEYSYM,
                         79, // O key
-                        "key.category.cropmod"
-                )
-        );
+                        CROPMOD_CATEGORY));
 
         // Register tick event for key handling
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleProtectionKeyBinding.wasPressed()) {
+            while (toggleModKeyBinding.wasPressed()) {
                 CropModConfig config = CropModConfig.get();
-                config.cropProtectionEnabled = !config.cropProtectionEnabled;
+
+                // Simply toggle the master switch - all settings are preserved
+                config.modEnabled = !config.modEnabled;
                 AutoConfig.getConfigHolder(CropModConfig.class).save();
 
-                String message = config.cropProtectionEnabled ?
-                        "Crop protection enabled" : "Crop protection disabled";
+                String message = config.modEnabled ? "CropMod enabled" : "CropMod disabled";
 
                 if (client.player != null) {
                     client.player.sendMessage(Text.literal(message), false);
@@ -56,8 +59,7 @@ public class CropModClient implements ClientModInitializer {
                 config.cameraSnapEnabled = !config.cameraSnapEnabled;
                 AutoConfig.getConfigHolder(CropModConfig.class).save();
 
-                String message = config.cameraSnapEnabled ?
-                        "Camera snap enabled" : "Camera snap disabled";
+                String message = config.cameraSnapEnabled ? "Camera snap enabled" : "Camera snap disabled";
 
                 if (client.player != null) {
                     client.player.sendMessage(Text.literal(message), false);

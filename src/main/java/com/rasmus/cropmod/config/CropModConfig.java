@@ -9,8 +9,12 @@ import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 @Config(name = "cropmod")
 public class CropModConfig implements ConfigData {
 
+    // Master toggle for the entire mod
     @ConfigEntry.Gui.Tooltip
-    public boolean cropProtectionEnabled = true;
+    public boolean modEnabled = true;
+
+    @ConfigEntry.Gui.Tooltip
+    public boolean requireSeedsInInventory = false;
 
     @ConfigEntry.BoundedDiscrete(min = 0, max = 640)
     @ConfigEntry.Gui.Tooltip
@@ -23,10 +27,10 @@ public class CropModConfig implements ConfigData {
     public boolean requireHoeToBreakCrops = false;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean showProtectionParticles = false;
+    public boolean showProtectionParticles = false; // Changed to false by default
 
     @ConfigEntry.Gui.Tooltip
-    public boolean playProtectionSounds = true;
+    public boolean playProtectionSounds = false; // Changed to false by default
 
     // Camera snap settings moved to bottom
     @ConfigEntry.Gui.Tooltip

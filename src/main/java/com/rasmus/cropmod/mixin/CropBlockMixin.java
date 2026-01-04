@@ -55,6 +55,11 @@ public class CropBlockMixin {
 
     @Inject(method = "handleBlockBreaking", at = @At("HEAD"), cancellable = true)
     private void onHandleBlockBreaking(boolean breaking, CallbackInfo ci) {
+        // Check if mod is enabled first
+        if (!CropModConfig.get().modEnabled) {
+            return;
+        }
+
         MinecraftClient client = MinecraftClient.getInstance();
         PlayerEntity player = client.player;
 
@@ -85,8 +90,8 @@ public class CropBlockMixin {
                 }
             }
 
-            // Crop protection logic
-            if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
+            // Require seeds in inventory logic
+            if (CropModConfig.get().requireSeedsInInventory && shouldCancelAttack(player, blockState)) {
                 ci.cancel();
                 return;
             }
@@ -110,6 +115,11 @@ public class CropBlockMixin {
 
     @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
+        // Check if mod is enabled first
+        if (!CropModConfig.get().modEnabled) {
+            return;
+        }
+
         MinecraftClient client = MinecraftClient.getInstance();
         PlayerEntity player = client.player;
 
@@ -127,9 +137,7 @@ public class CropBlockMixin {
         if (isCropEnabled(block)) {
             // Hoe requirement logic
             if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
-                if (CropModConfig.get().showProtectionParticles) {
-                    spawnProtectionParticles(client, blockPos);
-                }
+                showProtectionEffects(client, blockPos);
                 cir.cancel();
                 return;
             }
@@ -143,20 +151,16 @@ public class CropBlockMixin {
                 }
             }
 
-            // Crop protection logic
-            if (CropModConfig.get().cropProtectionEnabled && shouldCancelAttack(player, blockState)) {
-                if (CropModConfig.get().showProtectionParticles) {
-                    spawnProtectionParticles(client, blockPos);
-                }
+            // Require seeds in inventory logic
+            if (CropModConfig.get().requireSeedsInInventory && shouldCancelAttack(player, blockState)) {
+                showProtectionEffects(client, blockPos);
                 cir.cancel();
                 return;
             }
 
             // Only harvest fully grown logic
             if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
-                if (CropModConfig.get().showProtectionParticles) {
-                    spawnProtectionParticles(client, blockPos);
-                }
+                showProtectionEffects(client, blockPos);
                 cir.cancel();
             }
         }
@@ -246,6 +250,19 @@ public class CropBlockMixin {
     }
 
     @Unique
+    private void showProtectionEffects(MinecraftClient client, BlockPos blockPos) {
+        // Show particles if enabled
+        if (CropModConfig.get().showProtectionParticles) {
+            spawnProtectionParticles(client, blockPos);
+        }
+
+        // Play sound if enabled (independent of particles)
+        if (CropModConfig.get().playProtectionSounds) {
+            playProtectionSound(client, blockPos);
+        }
+    }
+
+    @Unique
     private void spawnProtectionParticles(MinecraftClient client, BlockPos blockPos) {
         if (client.world == null || client.particleManager == null) return;
 
@@ -257,6 +274,7 @@ public class CropBlockMixin {
         // Get the actual height of the crop
         BlockState blockState = client.world.getBlockState(blockPos);
         double cropHeight = getCropHeight(blockState);
+        boolean isCocoa = blockState.getBlock() instanceof CocoaBlock;
 
         // Four corner posts that match the crop height
         for (double h = 0; h <= cropHeight; h += 0.2) {
@@ -290,19 +308,43 @@ public class CropBlockMixin {
             client.particleManager.addParticle(ParticleTypes.ENCHANT, x + 1, topHeight, z + w, 0, 0, 0);
         }
 
-        // Play a subtle sound effect
-        if (client.player != null && client.world != null && CropModConfig.get().playProtectionSounds) {
-            client.world.playSound(
-                    client.player,
-                    blockPos.getX() + 0.5,
-                    blockPos.getY() + 0.5,
-                    blockPos.getZ() + 0.5,
-                    SoundEvents.BLOCK_NOTE_BLOCK_BASS,
-                    net.minecraft.sound.SoundCategory.BLOCKS,
-                    0.3f,
-                    0.5f
-            );
+        // For cocoa, also add bottom edge particles (since it's a full block height)
+        if (isCocoa) {
+            double bottomHeight = y;
+
+            // North edge (bottom)
+            for (double w = 0.2; w <= 0.8; w += 0.3) {
+                client.particleManager.addParticle(ParticleTypes.ENCHANT, x + w, bottomHeight, z, 0, 0, 0);
+            }
+            // South edge (bottom)
+            for (double w = 0.2; w <= 0.8; w += 0.3) {
+                client.particleManager.addParticle(ParticleTypes.ENCHANT, x + w, bottomHeight, z + 1, 0, 0, 0);
+            }
+            // West edge (bottom)
+            for (double w = 0.2; w <= 0.8; w += 0.3) {
+                client.particleManager.addParticle(ParticleTypes.ENCHANT, x, bottomHeight, z + w, 0, 0, 0);
+            }
+            // East edge (bottom)
+            for (double w = 0.2; w <= 0.8; w += 0.3) {
+                client.particleManager.addParticle(ParticleTypes.ENCHANT, x + 1, bottomHeight, z + w, 0, 0, 0);
+            }
         }
+    }
+
+    @Unique
+    private void playProtectionSound(MinecraftClient client, BlockPos blockPos) {
+        if (client.player == null || client.world == null) return;
+
+        client.world.playSound(
+                client.player,
+                blockPos.getX() + 0.5,
+                blockPos.getY() + 0.5,
+                blockPos.getZ() + 0.5,
+                SoundEvents.BLOCK_NOTE_BLOCK_BASS,
+                net.minecraft.sound.SoundCategory.BLOCKS,
+                0.3f,
+                0.5f
+        );
     }
 
     @Unique
