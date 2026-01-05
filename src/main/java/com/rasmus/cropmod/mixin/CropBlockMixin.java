@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("null")
 @Mixin(MinecraftClient.class)
 public class CropBlockMixin {
 
@@ -264,7 +265,8 @@ public class CropBlockMixin {
 
     @Unique
     private void spawnProtectionParticles(MinecraftClient client, BlockPos blockPos) {
-        if (client.world == null || client.particleManager == null) return;
+        if (client.world == null || client.particleManager == null)
+            return;
 
         // Create a simple, clean barrier effect that adapts to crop height
         double x = blockPos.getX();
@@ -333,7 +335,8 @@ public class CropBlockMixin {
 
     @Unique
     private void playProtectionSound(MinecraftClient client, BlockPos blockPos) {
-        if (client.player == null || client.world == null) return;
+        if (client.player == null || client.world == null)
+            return;
 
         client.world.playSound(
                 client.player,
@@ -343,8 +346,7 @@ public class CropBlockMixin {
                 SoundEvents.BLOCK_NOTE_BLOCK_BASS,
                 net.minecraft.sound.SoundCategory.BLOCKS,
                 0.3f,
-                0.5f
-        );
+                0.5f);
     }
 
     @Unique

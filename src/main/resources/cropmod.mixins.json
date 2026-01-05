@@ -4,9 +4,11 @@
   "package": "com.rasmus.cropmod.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "CropBlockMixin"
+    "CropBlockMixin",
+    "HarvestTrackerMixin"
   ],
   "client": [
+    "HudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

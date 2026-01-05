@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 public class CropModClient implements ClientModInitializer {
     private static KeyBinding toggleModKeyBinding;
     private static KeyBinding toggleCameraSnapKeyBinding;
+    private static KeyBinding toggleStatsKeyBinding;
 
     // Create a custom category for CropMod keybindings
     private static final KeyBinding.Category CROPMOD_CATEGORY = KeyBinding.Category.create(
@@ -20,8 +21,7 @@ public class CropModClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Don't register config here - it's already registered in the main mod
-        // initializer
+        // HUD rendering is now handled by HudMixin
 
         // Register key bindings
         toggleModKeyBinding = KeyBindingHelper.registerKeyBinding(
@@ -36,6 +36,13 @@ public class CropModClient implements ClientModInitializer {
                         "key.cropmod.toggleCameraSnap",
                         InputUtil.Type.KEYSYM,
                         79, // O key
+                        CROPMOD_CATEGORY));
+
+        toggleStatsKeyBinding = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding(
+                        "key.cropmod.toggleStats",
+                        InputUtil.Type.KEYSYM,
+                        72, // H key
                         CROPMOD_CATEGORY));
 
         // Register tick event for key handling
@@ -63,6 +70,31 @@ public class CropModClient implements ClientModInitializer {
 
                 if (client.player != null) {
                     client.player.sendMessage(Text.literal(message), false);
+                }
+            }
+
+            while (toggleStatsKeyBinding.wasPressed()) {
+                CropModConfig config = CropModConfig.get();
+
+                // If shift is held, reset stats
+                if (client.options.sneakKey.isPressed()) {
+                    HarvestStatistics.getInstance().reset();
+                    if (client.player != null) {
+                        client.player.sendMessage(Text.literal("§6Harvest statistics reset!"), false);
+                    }
+                }
+                // If control/sprint is held, open drag screen
+                else if (client.options.sprintKey.isPressed()) {
+                    client.setScreen(new HudDragScreen());
+                } else {
+                    config.showHarvestStats = !config.showHarvestStats;
+                    AutoConfig.getConfigHolder(CropModConfig.class).save();
+
+                    String message = config.showHarvestStats ? "Harvest stats enabled" : "Harvest stats disabled";
+
+                    if (client.player != null) {
+                        client.player.sendMessage(Text.literal(message), false);
+                    }
                 }
             }
         });
