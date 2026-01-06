@@ -4,7 +4,9 @@ A Fabric mod for smarter crop farming. Protect your seeds, track your harvests, 
 
 ## Why CropMod?
 
-Built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants crops using seeds from your inventory. CropMod prevents breaking crops when you're running low on seeds—so you never brick your farm mid-harvest.
+Originally built for **mcMMO** players—at Herbalism 1000, mcMMO auto-replants crops using seeds from your inventory. CropMod prevents breaking crops when you're running low on seeds, so you never brick your farm mid-harvest.
+
+**Works everywhere.** No mcMMO required. Useful for any player who wants smarter farming.
 
 ## Features
 
