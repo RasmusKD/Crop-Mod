@@ -12,11 +12,12 @@ Built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants crops using 
 - Blocks harvesting when seed count drops below threshold (default: 67)
 - Works with mcMMO's auto-replant
 - Visual particles show when protection kicks in
+- **Protected crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa
 
 ### Harvest Control
 - Only break fully grown crops
 - Require hoe in hand to harvest
-- Per-crop toggles for all supported crops
+- Per-crop toggles
 
 ### Camera Snap
 - Auto-align camera to 90° when farming
@@ -28,10 +29,7 @@ Built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants crops using 
 - Per-minute rate calculation
 - Draggable position (Ctrl+H)
 - Configurable scale and display mode
-- Supports 17 crop types
-
-### Supported Crops
-Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa, Pumpkin, Melon, Sweet Berries, Sugar Cane, Bamboo, Kelp, Cactus, Chorus, Glow Berries, Torchflower, Pitcher Plant
+- **Tracked crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa, Pumpkin, Melon, Sweet Berries, Sugar Cane, Bamboo, Kelp, Cactus, Chorus, Glow Berries, Torchflower, Pitcher Plant
 
 ### Keybinds
 - **P** — Toggle crop protection
