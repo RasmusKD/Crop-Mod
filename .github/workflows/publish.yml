@@ -53,7 +53,7 @@ jobs:
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
         with:
-          modrinth-id: REPLACE_WITH_MODRINTH_ID
+          modrinth-id: tLbSs6cD
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: build/libs/!(*-sources).jar
           loaders: fabric
