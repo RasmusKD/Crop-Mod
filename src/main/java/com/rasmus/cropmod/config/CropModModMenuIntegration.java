@@ -216,7 +216,7 @@ public class CropModModMenuIntegration implements ModMenuApi {
                         stats.addEntry(new ButtonListEntry(
                                         Component.literal("Position HUD"),
                                         Component.literal("§eOpen"),
-                                        () -> net.minecraft.client.Minecraft.getInstance().gui
+                                        () -> net.minecraft.client.Minecraft.getInstance()
                                                         .setScreen(new com.rasmus.cropmod.client.HudDragScreen())));
 
                         // Reset Session Stats button

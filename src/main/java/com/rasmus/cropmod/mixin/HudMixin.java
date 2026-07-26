@@ -6,7 +6,7 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Hud;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,7 +27,7 @@ import java.util.Map;
  * Mixin to render harvest statistics directly on the HUD.
  * Shows per-crop counts with item icons.
  */
-@Mixin(Hud.class)
+@Mixin(Gui.class)
 public class HudMixin {
 
     @Shadow
@@ -42,7 +42,7 @@ public class HudMixin {
             return;
         }
 
-        if (minecraft.player == null || ((Hud) (Object) this).isHidden()) {
+        if (minecraft.player == null || minecraft.options.hideGui) {
             return;
         }
 

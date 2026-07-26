@@ -45,7 +45,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           files: build/libs/!(*-sources).jar
           loaders: fabric
-          game-versions: ">=26.2"
+          game-versions: |
+            26.1
+            26.1.1
+            26.1.2
 
       - name: Publish to Modrinth
         if: env.MODRINTH_TOKEN != ''
@@ -57,4 +60,7 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: build/libs/!(*-sources).jar
           loaders: fabric
-          game-versions: ">=26.2"
+          game-versions: |
+            26.1
+            26.1.1
+            26.1.2
