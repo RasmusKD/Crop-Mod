@@ -2,12 +2,12 @@ package com.rasmus.cropmod.client;
 
 import com.rasmus.cropmod.config.CropModConfig;
 import me.shedaniel.autoconfig.AutoConfig;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 /**
  * Screen for dragging the HUD to a custom position.
@@ -31,7 +31,7 @@ public class HudDragScreen extends Screen {
     private int previewHeight;
 
     public HudDragScreen() {
-        super(Text.literal("Position HUD"));
+        super(Component.literal("Position HUD"));
         this.config = CropModConfig.get();
         this.hudX = -1;
         this.hudY = -1;
@@ -41,7 +41,7 @@ public class HudDragScreen extends Screen {
     protected void init() {
         // Calculate preview size once
         float scale = Math.max(0.5f, Math.min(2.0f, config.statsScale));
-        int textWidth = this.textRenderer.getWidth(SAMPLE_TEXT);
+        int textWidth = this.font.width(SAMPLE_TEXT);
         previewWidth = (int) ((18 + textWidth + 6) * scale); // 16 icon + 2 gap + text + padding
         previewHeight = (int) (20 * scale);
 
@@ -62,7 +62,7 @@ public class HudDragScreen extends Screen {
 
         int buttonY = 45;
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Save"), button -> {
+        addRenderableWidget(Button.builder(Component.literal("Save"), button -> {
             int maxX = Math.max(1, this.width - previewWidth);
             int maxY = Math.max(1, this.height - previewHeight);
             config.statsCustomX = (float) hudX / (float) maxX;
@@ -71,19 +71,19 @@ public class HudDragScreen extends Screen {
             config.statsCustomX = Math.max(0f, Math.min(1f, config.statsCustomX));
             config.statsCustomY = Math.max(0f, Math.min(1f, config.statsCustomY));
             AutoConfig.getConfigHolder(CropModConfig.class).save();
-            close();
-        }).dimensions(this.width / 2 - 75, buttonY, 70, 20).build());
+            onClose();
+        }).bounds(this.width / 2 - 75, buttonY, 70, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), button -> {
+        addRenderableWidget(Button.builder(Component.literal("Reset"), button -> {
             config.statsCustomX = -1f;
             config.statsCustomY = -1f;
             AutoConfig.getConfigHolder(CropModConfig.class).save();
-            close();
-        }).dimensions(this.width / 2 + 5, buttonY, 70, 20).build());
+            onClose();
+        }).bounds(this.width / 2 + 5, buttonY, 70, 20).build());
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         float scale = Math.max(0.5f, Math.min(2.0f, config.statsScale));
 
         // Semi-transparent background
@@ -100,16 +100,16 @@ public class HudDragScreen extends Screen {
         lastMouseY = mouseY;
 
         // Instructions
-        context.drawCenteredTextWithShadow(this.textRenderer,
-                Text.literal("Drag to position (Scale: " + String.format("%.1f", scale) + "x)"),
+        context.centeredText(this.font,
+                Component.literal("Drag to position (Scale: " + String.format("%.1f", scale) + "x)"),
                 this.width / 2, 10, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer,
-                Text.literal("X: " + hudX + " Y: " + hudY),
+        context.centeredText(this.font,
+                Component.literal("X: " + hudX + " Y: " + hudY),
                 this.width / 2, 25, 0xFF888888);
 
         // Apply scaling like the real HUD
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
 
         int scaledX = (int) (hudX / scale);
         int scaledY = (int) (hudY / scale);
@@ -127,12 +127,12 @@ public class HudDragScreen extends Screen {
         context.fill(scaledX + scaledWidth - 1, scaledY, scaledX + scaledWidth, scaledY + scaledHeight, boxColor);
 
         // Single line: icon + text
-        context.drawItem(CARROT, scaledX + 1, scaledY + 1);
-        context.drawTextWithShadow(this.textRenderer, SAMPLE_TEXT, scaledX + 18, scaledY + 5, 0xFFFFFFFF);
+        context.item(CARROT, scaledX + 1, scaledY + 1);
+        context.text(this.font, SAMPLE_TEXT, scaledX + 18, scaledY + 5, 0xFFFFFFFF, true);
 
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     private boolean isOverHud(int mouseX, int mouseY) {
@@ -143,9 +143,9 @@ public class HudDragScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        if (this.client != null && this.client.mouse != null) {
+        if (this.minecraft != null && this.minecraft.mouseHandler != null) {
             boolean leftDown = org.lwjgl.glfw.GLFW.glfwGetMouseButton(
-                    this.client.getWindow().getHandle(),
+                    this.minecraft.getWindow().handle(),
                     org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT) == org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
             if (leftDown && !dragging) {
@@ -161,7 +161,7 @@ public class HudDragScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(null);
+    public void onClose() {
+        this.minecraft.gui.setScreen(null);
     }
 }

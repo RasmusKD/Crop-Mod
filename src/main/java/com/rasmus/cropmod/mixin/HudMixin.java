@@ -2,16 +2,16 @@ package com.rasmus.cropmod.mixin;
 
 import com.rasmus.cropmod.client.HarvestStatistics;
 import com.rasmus.cropmod.config.CropModConfig;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,22 +27,22 @@ import java.util.Map;
  * Mixin to render harvest statistics directly on the HUD.
  * Shows per-crop counts with item icons.
  */
-@Mixin(InGameHud.class)
+@Mixin(Hud.class)
 public class HudMixin {
 
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void renderHarvestStats(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void renderHarvestStats(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
         CropModConfig config = CropModConfig.get();
 
         if (!config.modEnabled || !config.showHarvestStats) {
             return;
         }
 
-        if (client.player == null || client.options.hudHidden) {
+        if (minecraft.player == null || ((Hud) (Object) this).isHidden()) {
             return;
         }
 
@@ -70,16 +70,16 @@ public class HudMixin {
             sortedCrops = sortedCrops.subList(0, maxCrops);
         }
 
-        TextRenderer textRenderer = client.textRenderer;
+        Font textRenderer = minecraft.font;
         float scale = Math.max(0.5f, Math.min(2.0f, config.statsScale));
-        int screenWidth = client.getWindow().getScaledWidth();
-        int screenHeight = client.getWindow().getScaledHeight();
+        int screenWidth = context.guiWidth();
+        int screenHeight = context.guiHeight();
 
         // Calculate max width of all entries (icon + text)
         int maxTextWidth = 0;
         for (Map.Entry<Block, Integer> entry : sortedCrops) {
             String text = buildDisplayText(entry.getValue(), entry.getKey(), stats, config.statsDisplayMode);
-            int textWidth = textRenderer.getWidth(text);
+            int textWidth = textRenderer.width(text);
             if (textWidth > maxTextWidth) {
                 maxTextWidth = textWidth;
             }
@@ -115,8 +115,8 @@ public class HudMixin {
         baseY = Math.max(0, Math.min(baseY, scaledHeight - hudHeight));
 
         // Apply scaling
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
 
         int lineHeight = 18;
         int currentY = baseY;
@@ -134,18 +134,18 @@ public class HudMixin {
             }
 
             // Draw item icon (16x16)
-            context.drawItem(itemStack, baseX, currentY - 1);
+            context.item(itemStack, baseX, currentY - 1);
 
             // Build text based on display mode
             String countText = buildDisplayText(count, cropBlock, stats, config.statsDisplayMode);
 
             // Draw count text - white with full alpha
-            context.drawText(textRenderer, countText, baseX + 18, currentY + 3, 0xFFFFFFFF, true);
+            context.text(textRenderer, countText, baseX + 18, currentY + 3, 0xFFFFFFFF, true);
 
             currentY += lineHeight;
         }
 
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
     }
 
     /**

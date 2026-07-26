@@ -1,53 +1,53 @@
 package com.rasmus.cropmod.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.rasmus.cropmod.config.CropModConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public class CropModClient implements ClientModInitializer {
-    private static KeyBinding toggleModKeyBinding;
-    private static KeyBinding toggleCameraSnapKeyBinding;
-    private static KeyBinding toggleStatsKeyBinding;
+    private static KeyMapping toggleModKeyBinding;
+    private static KeyMapping toggleCameraSnapKeyBinding;
+    private static KeyMapping toggleStatsKeyBinding;
 
     // Create a custom category for CropMod keybindings
-    private static final KeyBinding.Category CROPMOD_CATEGORY = KeyBinding.Category.create(
-            Identifier.of("cropmod", "category"));
+    private static final KeyMapping.Category CROPMOD_CATEGORY = KeyMapping.Category.register(
+            Identifier.fromNamespaceAndPath("cropmod", "category"));
 
     @Override
     public void onInitializeClient() {
         // HUD rendering is now handled by HudMixin
 
         // Register key bindings
-        toggleModKeyBinding = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding(
+        toggleModKeyBinding = KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
                         "key.cropmod.toggleMod",
-                        InputUtil.Type.KEYSYM,
+                        InputConstants.Type.KEYSYM,
                         66, // B key
                         CROPMOD_CATEGORY));
 
-        toggleCameraSnapKeyBinding = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding(
+        toggleCameraSnapKeyBinding = KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
                         "key.cropmod.toggleCameraSnap",
-                        InputUtil.Type.KEYSYM,
+                        InputConstants.Type.KEYSYM,
                         79, // O key
                         CROPMOD_CATEGORY));
 
-        toggleStatsKeyBinding = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding(
+        toggleStatsKeyBinding = KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
                         "key.cropmod.toggleStats",
-                        InputUtil.Type.KEYSYM,
+                        InputConstants.Type.KEYSYM,
                         72, // H key
                         CROPMOD_CATEGORY));
 
         // Register tick event for key handling
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleModKeyBinding.wasPressed()) {
+            while (toggleModKeyBinding.consumeClick()) {
                 CropModConfig config = CropModConfig.get();
 
                 // Simply toggle the master switch - all settings are preserved
@@ -57,11 +57,11 @@ public class CropModClient implements ClientModInitializer {
                 String message = config.modEnabled ? "CropMod enabled" : "CropMod disabled";
 
                 if (client.player != null) {
-                    client.player.sendMessage(Text.literal(message), false);
+                    client.player.sendSystemMessage(Component.literal(message));
                 }
             }
 
-            while (toggleCameraSnapKeyBinding.wasPressed()) {
+            while (toggleCameraSnapKeyBinding.consumeClick()) {
                 CropModConfig config = CropModConfig.get();
                 config.cameraSnapEnabled = !config.cameraSnapEnabled;
                 AutoConfig.getConfigHolder(CropModConfig.class).save();
@@ -69,23 +69,23 @@ public class CropModClient implements ClientModInitializer {
                 String message = config.cameraSnapEnabled ? "Camera snap enabled" : "Camera snap disabled";
 
                 if (client.player != null) {
-                    client.player.sendMessage(Text.literal(message), false);
+                    client.player.sendSystemMessage(Component.literal(message));
                 }
             }
 
-            while (toggleStatsKeyBinding.wasPressed()) {
+            while (toggleStatsKeyBinding.consumeClick()) {
                 CropModConfig config = CropModConfig.get();
 
                 // If shift is held, reset stats
-                if (client.options.sneakKey.isPressed()) {
+                if (client.options.keyShift.isDown()) {
                     HarvestStatistics.getInstance().reset();
                     if (client.player != null) {
-                        client.player.sendMessage(Text.literal("§6Harvest statistics reset!"), false);
+                        client.player.sendSystemMessage(Component.literal("§6Harvest statistics reset!"));
                     }
                 }
                 // If control/sprint is held, open drag screen
-                else if (client.options.sprintKey.isPressed()) {
-                    client.setScreen(new HudDragScreen());
+                else if (client.options.keySprint.isDown()) {
+                    client.gui.setScreen(new HudDragScreen());
                 } else {
                     config.showHarvestStats = !config.showHarvestStats;
                     AutoConfig.getConfigHolder(CropModConfig.class).save();
@@ -93,7 +93,7 @@ public class CropModClient implements ClientModInitializer {
                     String message = config.showHarvestStats ? "Harvest stats enabled" : "Harvest stats disabled";
 
                     if (client.player != null) {
-                        client.player.sendMessage(Text.literal(message), false);
+                        client.player.sendSystemMessage(Component.literal(message));
                     }
                 }
             }

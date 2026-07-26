@@ -2,15 +2,16 @@ package com.rasmus.cropmod.mixin;
 
 import com.rasmus.cropmod.client.HarvestStatistics;
 import com.rasmus.cropmod.config.CropModConfig;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CropBlock;
-import net.minecraft.block.NetherWartBlock;
-import net.minecraft.block.CocoaBlock;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CocoaBlock;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,16 +20,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Mixin to track when blocks are successfully broken.
  */
-@Mixin(ClientPlayerInteractionManager.class)
+@Mixin(MultiPlayerGameMode.class)
 public class HarvestTrackerMixin {
 
-    @Inject(method = "breakBlock", at = @At("HEAD"))
+    @Inject(method = "destroyBlock", at = @At("HEAD"))
     private void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         if (!CropModConfig.get().modEnabled) {
             return;
         }
 
-        World world = net.minecraft.client.MinecraftClient.getInstance().world;
+        Level world = Minecraft.getInstance().level;
 
         if (world == null) {
             return;
@@ -60,11 +61,11 @@ public class HarvestTrackerMixin {
         Block block = state.getBlock();
 
         if (block instanceof CropBlock cropBlock) {
-            return cropBlock.isMature(state);
+            return cropBlock.isMaxAge(state);
         } else if (block instanceof NetherWartBlock) {
-            return state.get(NetherWartBlock.AGE) >= 3;
+            return state.getValue(NetherWartBlock.AGE) >= 3;
         } else if (block instanceof CocoaBlock) {
-            return state.get(CocoaBlock.AGE) >= 2;
+            return state.getValue(CocoaBlock.AGE) >= 2;
         }
 
         return true;
