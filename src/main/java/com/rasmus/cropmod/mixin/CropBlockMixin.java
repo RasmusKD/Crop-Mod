@@ -1,5 +1,6 @@
 package com.rasmus.cropmod.mixin;
 
+import com.rasmus.cropmod.CropProtection;
 import com.rasmus.cropmod.config.CropModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -7,17 +8,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
-import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -28,37 +24,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @SuppressWarnings("null")
 @Mixin(Minecraft.class)
 public class CropBlockMixin {
-
-    @Unique
-    private static final Map<Block, Item> CROP_SEED_MAP = new HashMap<>();
-    @Unique
-    private static final Map<Block, String> CROP_CONFIG_KEYS = new HashMap<>();
-
-    static {
-        CROP_SEED_MAP.put(Blocks.WHEAT, Items.WHEAT_SEEDS);
-        CROP_SEED_MAP.put(Blocks.CARROTS, Items.CARROT);
-        CROP_SEED_MAP.put(Blocks.POTATOES, Items.POTATO);
-        CROP_SEED_MAP.put(Blocks.BEETROOTS, Items.BEETROOT_SEEDS);
-        CROP_SEED_MAP.put(Blocks.NETHER_WART, Items.NETHER_WART);
-        CROP_SEED_MAP.put(Blocks.COCOA, Items.COCOA_BEANS);
-        CROP_SEED_MAP.put(Blocks.TORCHFLOWER_CROP, Items.TORCHFLOWER_SEEDS);
-        CROP_SEED_MAP.put(Blocks.PITCHER_CROP, Items.PITCHER_POD);
-
-        CROP_CONFIG_KEYS.put(Blocks.WHEAT, "wheatEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.CARROTS, "carrotsEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.POTATOES, "potatoesEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.BEETROOTS, "beetrootsEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.NETHER_WART, "netherWartEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.COCOA, "cocoaEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.TORCHFLOWER_CROP, "torchflowerEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.PITCHER_CROP, "pitcherPlantEnabled");
-    }
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
     private void onHandleBlockBreaking(boolean breaking, CallbackInfo ci) {
@@ -81,15 +50,15 @@ public class CropBlockMixin {
         Block block = blockState.getBlock();
 
         // Growth point protection: never break the block the plant regrows from
-        if (isProtectedGrowthPoint(blockPos, block)) {
+        if (CropProtection.isProtectedGrowthPoint(blockPos, block)) {
             ci.cancel();
             return;
         }
 
         // Only apply CropMod features to enabled crops
-        if (isCropEnabled(block)) {
+        if (CropProtection.isCropEnabled(block)) {
             // Hoe requirement logic
-            if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+            if (CropModConfig.get().requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
                 ci.cancel();
                 return;
             }
@@ -104,13 +73,13 @@ public class CropBlockMixin {
             }
 
             // Require seeds in inventory logic
-            if (CropModConfig.get().requireSeedsInInventory && shouldCancelAttack(player, blockState)) {
+            if (CropModConfig.get().requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
                 ci.cancel();
                 return;
             }
 
             // Only harvest fully grown logic
-            if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
+            if (CropModConfig.get().onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
                 ci.cancel();
                 return;
             }
@@ -147,16 +116,16 @@ public class CropBlockMixin {
         Block block = blockState.getBlock();
 
         // Growth point protection: never break the block the plant regrows from
-        if (isProtectedGrowthPoint(blockPos, block)) {
+        if (CropProtection.isProtectedGrowthPoint(blockPos, block)) {
             showProtectionEffects(client, blockPos);
             cir.cancel();
             return;
         }
 
         // Only apply CropMod features to enabled crops
-        if (isCropEnabled(block)) {
+        if (CropProtection.isCropEnabled(block)) {
             // Hoe requirement logic
-            if (CropModConfig.get().requireHoeToBreakCrops && !isHoldingHoe(player)) {
+            if (CropModConfig.get().requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
                 showProtectionEffects(client, blockPos);
                 cir.cancel();
                 return;
@@ -172,147 +141,18 @@ public class CropBlockMixin {
             }
 
             // Require seeds in inventory logic
-            if (CropModConfig.get().requireSeedsInInventory && shouldCancelAttack(player, blockState)) {
+            if (CropModConfig.get().requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
                 showProtectionEffects(client, blockPos);
                 cir.cancel();
                 return;
             }
 
             // Only harvest fully grown logic
-            if (CropModConfig.get().onlyHarvestFullyGrown && isCropNotFullyGrown(blockState)) {
+            if (CropModConfig.get().onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
                 showProtectionEffects(client, blockPos);
                 cir.cancel();
             }
         }
-    }
-
-    /**
-     * Sugar cane, bamboo and kelp regrow from their bottom block; cave vines
-     * (glow berries) and pale hanging moss hang from their top block. Breaking
-     * that one block kills the plant, the rest is free harvest.
-     */
-    @Unique
-    private boolean isProtectedGrowthPoint(BlockPos pos, Block block) {
-        CropModConfig config = CropModConfig.get();
-        var level = Minecraft.getInstance().level;
-        if (level == null) {
-            return false;
-        }
-        if (block == Blocks.SUGAR_CANE) {
-            return config.sugarCaneEnabled
-                    && level.getBlockState(pos.below()).getBlock() != Blocks.SUGAR_CANE;
-        }
-        if (block == Blocks.BAMBOO || block == Blocks.BAMBOO_SAPLING) {
-            Block below = level.getBlockState(pos.below()).getBlock();
-            return config.bambooEnabled
-                    && below != Blocks.BAMBOO && below != Blocks.BAMBOO_SAPLING;
-        }
-        if (block == Blocks.KELP || block == Blocks.KELP_PLANT) {
-            return config.kelpEnabled
-                    && level.getBlockState(pos.below()).getBlock() != Blocks.KELP_PLANT;
-        }
-        if (block == Blocks.CAVE_VINES || block == Blocks.CAVE_VINES_PLANT) {
-            Block above = level.getBlockState(pos.above()).getBlock();
-            return config.glowBerriesEnabled
-                    && above != Blocks.CAVE_VINES && above != Blocks.CAVE_VINES_PLANT;
-        }
-        if (block == Blocks.PALE_HANGING_MOSS) {
-            return config.paleMossEnabled
-                    && level.getBlockState(pos.above()).getBlock() != Blocks.PALE_HANGING_MOSS;
-        }
-        if (block == Blocks.CACTUS) {
-            return config.cactusEnabled
-                    && level.getBlockState(pos.below()).getBlock() != Blocks.CACTUS;
-        }
-        if (block == Blocks.MELON_STEM || block == Blocks.PUMPKIN_STEM
-                || block == Blocks.ATTACHED_MELON_STEM || block == Blocks.ATTACHED_PUMPKIN_STEM) {
-            return config.protectStems;
-        }
-        if (block == Blocks.SWEET_BERRY_BUSH) {
-            return config.protectBerryBushes;
-        }
-        if (block == Blocks.BUDDING_AMETHYST) {
-            // gone forever if broken, drops nothing even with silk touch
-            return config.protectBuddingAmethyst;
-        }
-        return false;
-    }
-
-    @Unique
-    private boolean isHoldingHoe(Player player) {
-        ItemStack mainHandStack = player.getMainHandItem();
-        ItemStack offHandStack = player.getOffhandItem();
-
-        return mainHandStack.is(ItemTags.HOES) || offHandStack.is(ItemTags.HOES);
-    }
-
-    @Unique
-    private boolean shouldCancelAttack(Player player, BlockState blockState) {
-        Block block = blockState.getBlock();
-        Item correspondingSeed = CROP_SEED_MAP.get(block);
-
-        if (correspondingSeed == null) {
-            return false;
-        }
-
-        int seedCount = 0;
-        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
-            if (stack.getItem() == correspondingSeed) {
-                seedCount += stack.getCount();
-            }
-            if (seedCount >= CropModConfig.get().itemThreshold) {
-                return false;
-            }
-        }
-
-        // Also count seeds held in the offhand
-        ItemStack offhand = player.getOffhandItem();
-        if (offhand.getItem() == correspondingSeed) {
-            seedCount += offhand.getCount();
-            if (seedCount >= CropModConfig.get().itemThreshold) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Unique
-    private boolean isCropEnabled(Block block) {
-        CropModConfig config = CropModConfig.get();
-        String configKey = CROP_CONFIG_KEYS.get(block);
-        if (configKey == null) {
-            return false; // Not a supported crop
-        }
-
-        return switch (configKey) {
-            case "wheatEnabled" -> config.wheatEnabled;
-            case "carrotsEnabled" -> config.carrotsEnabled;
-            case "potatoesEnabled" -> config.potatoesEnabled;
-            case "beetrootsEnabled" -> config.beetrootsEnabled;
-            case "netherWartEnabled" -> config.netherWartEnabled;
-            case "cocoaEnabled" -> config.cocoaEnabled;
-            case "torchflowerEnabled" -> config.torchflowerEnabled;
-            case "pitcherPlantEnabled" -> config.pitcherPlantEnabled;
-            default -> false;
-        };
-    }
-
-    @Unique
-    private boolean isCropNotFullyGrown(BlockState blockState) {
-        Block block = blockState.getBlock();
-
-        if (block instanceof CropBlock cropBlock) {
-            return !cropBlock.isMaxAge(blockState);
-        } else if (block instanceof NetherWartBlock) {
-            return blockState.getValue(NetherWartBlock.AGE) < 3;
-        } else if (block instanceof CocoaBlock) {
-            return blockState.getValue(CocoaBlock.AGE) < 2;
-        } else if (block instanceof PitcherCropBlock) {
-            return blockState.getValue(PitcherCropBlock.AGE) < PitcherCropBlock.MAX_AGE;
-        }
-
-        return false;
     }
 
     @Unique
