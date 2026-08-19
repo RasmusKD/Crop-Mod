@@ -75,6 +75,12 @@ public class CropBlockMixin {
         BlockState blockState = client.level.getBlockState(blockPos);
         Block block = blockState.getBlock();
 
+        // Growth point protection: never break the block the plant regrows from
+        if (isProtectedGrowthPoint(blockPos, block)) {
+            ci.cancel();
+            return;
+        }
+
         // Only apply CropMod features to enabled crops
         if (isCropEnabled(block)) {
             // Hoe requirement logic
@@ -135,6 +141,13 @@ public class CropBlockMixin {
         BlockState blockState = client.level.getBlockState(blockPos);
         Block block = blockState.getBlock();
 
+        // Growth point protection: never break the block the plant regrows from
+        if (isProtectedGrowthPoint(blockPos, block)) {
+            showProtectionEffects(client, blockPos);
+            cir.cancel();
+            return;
+        }
+
         // Only apply CropMod features to enabled crops
         if (isCropEnabled(block)) {
             // Hoe requirement logic
@@ -166,6 +179,43 @@ public class CropBlockMixin {
                 cir.cancel();
             }
         }
+    }
+
+    /**
+     * Sugar cane, bamboo and kelp regrow from their bottom block; cave vines
+     * (glow berries) and pale hanging moss hang from their top block. Breaking
+     * that one block kills the plant, the rest is free harvest.
+     */
+    @Unique
+    private boolean isProtectedGrowthPoint(BlockPos pos, Block block) {
+        CropModConfig config = CropModConfig.get();
+        var level = Minecraft.getInstance().level;
+        if (level == null) {
+            return false;
+        }
+        if (block == Blocks.SUGAR_CANE) {
+            return config.sugarCaneEnabled
+                    && level.getBlockState(pos.below()).getBlock() != Blocks.SUGAR_CANE;
+        }
+        if (block == Blocks.BAMBOO || block == Blocks.BAMBOO_SAPLING) {
+            Block below = level.getBlockState(pos.below()).getBlock();
+            return config.bambooEnabled
+                    && below != Blocks.BAMBOO && below != Blocks.BAMBOO_SAPLING;
+        }
+        if (block == Blocks.KELP || block == Blocks.KELP_PLANT) {
+            return config.kelpEnabled
+                    && level.getBlockState(pos.below()).getBlock() != Blocks.KELP_PLANT;
+        }
+        if (block == Blocks.CAVE_VINES || block == Blocks.CAVE_VINES_PLANT) {
+            Block above = level.getBlockState(pos.above()).getBlock();
+            return config.glowBerriesEnabled
+                    && above != Blocks.CAVE_VINES && above != Blocks.CAVE_VINES_PLANT;
+        }
+        if (block == Blocks.PALE_HANGING_MOSS) {
+            return config.paleMossEnabled
+                    && level.getBlockState(pos.above()).getBlock() != Blocks.PALE_HANGING_MOSS;
+        }
+        return false;
     }
 
     @Unique

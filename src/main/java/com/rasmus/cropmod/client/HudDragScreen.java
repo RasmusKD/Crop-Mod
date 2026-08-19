@@ -162,6 +162,6 @@ public class HudDragScreen extends Screen {
 
     @Override
     public void onClose() {
-        this.minecraft.gui.setScreen(null);
+        this.minecraft.setScreenAndShow(null);
     }
 }

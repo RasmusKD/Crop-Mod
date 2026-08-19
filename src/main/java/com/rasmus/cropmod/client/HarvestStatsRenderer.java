@@ -1,48 +1,53 @@
-package com.rasmus.cropmod.mixin;
+package com.rasmus.cropmod.client;
 
-import com.rasmus.cropmod.client.HarvestStatistics;
 import com.rasmus.cropmod.config.CropModConfig;
-import net.minecraft.client.DeltaTracker;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.Hud;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
- * Mixin to render harvest statistics directly on the HUD.
- * Shows per-crop counts with item icons.
+ * Renders the harvest statistics HUD. Shared by the Gui (26.1) and Hud
+ * (26.2) mixins, which only differ in their hidden-HUD check: 26.1 has the
+ * public Options.hideGui field, 26.2 moved it to Hud.isHidden().
  */
-@Mixin(Hud.class)
-public class HudMixin {
+public final class HarvestStatsRenderer {
 
-    @Shadow
-    @Final
-    private Minecraft minecraft;
+    private static Field hideGuiField;
 
-    @Inject(method = "extractRenderState", at = @At("TAIL"))
-    private void renderHarvestStats(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
+    private HarvestStatsRenderer() {
+    }
+
+    /** 26.1 only: reads Options.hideGui by reflection, the field is gone in 26.2. */
+    public static boolean legacyHudHidden() {
+        var options = Minecraft.getInstance().options;
+        try {
+            if (hideGuiField == null) {
+                hideGuiField = options.getClass().getField("hideGui");
+            }
+            return hideGuiField.getBoolean(options);
+        } catch (ReflectiveOperationException e) {
+            return false;
+        }
+    }
+
+    public static void render(GuiGraphicsExtractor context) {
         CropModConfig config = CropModConfig.get();
 
         if (!config.modEnabled || !config.showHarvestStats) {
             return;
         }
 
-        if (minecraft.player == null || ((Hud) (Object) this).isHidden()) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
             return;
         }
 
@@ -151,7 +156,7 @@ public class HudMixin {
     /**
      * Build display text based on the configured display mode.
      */
-    private String buildDisplayText(int count, Block cropBlock, HarvestStatistics stats,
+    private static String buildDisplayText(int count, Block cropBlock, HarvestStatistics stats,
             CropModConfig.StatsDisplayMode mode) {
         switch (mode) {
             case SESSION:
@@ -175,7 +180,7 @@ public class HudMixin {
     /**
      * Get the item that represents a crop for display.
      */
-    private Item getCropItem(Block cropBlock) {
+    private static Item getCropItem(Block cropBlock) {
         if (cropBlock == Blocks.WHEAT)
             return Items.WHEAT;
         if (cropBlock == Blocks.CARROTS)

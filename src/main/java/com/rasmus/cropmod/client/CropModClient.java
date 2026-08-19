@@ -85,7 +85,7 @@ public class CropModClient implements ClientModInitializer {
                 }
                 // If control/sprint is held, open drag screen
                 else if (client.options.keySprint.isDown()) {
-                    client.gui.setScreen(new HudDragScreen());
+                    client.setScreenAndShow(new HudDragScreen());
                 } else {
                     config.showHarvestStats = !config.showHarvestStats;
                     AutoConfig.getConfigHolder(CropModConfig.class).save();

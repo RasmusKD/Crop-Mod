@@ -112,6 +112,26 @@ public class CropModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean cocoaEnabled = true;
 
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean sugarCaneEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean bambooEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean kelpEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean glowBerriesEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean paleMossEnabled = true;
+
     // Harvest Statistics settings
     @ConfigEntry.Gui.Tooltip
     public boolean showHarvestStats = false;

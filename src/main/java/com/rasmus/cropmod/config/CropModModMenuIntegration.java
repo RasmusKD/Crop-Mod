@@ -162,6 +162,46 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .setSaveConsumer(val -> config.cocoaEnabled = val)
                                         .build());
 
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.sugarCaneEnabled"),
+                                                        config.sugarCaneEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.sugarCaneEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.sugarCaneEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.bambooEnabled"),
+                                                        config.bambooEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.bambooEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.bambooEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.kelpEnabled"),
+                                                        config.kelpEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.kelpEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.kelpEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.glowBerriesEnabled"),
+                                                        config.glowBerriesEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.glowBerriesEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.glowBerriesEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.paleMossEnabled"),
+                                                        config.paleMossEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.paleMossEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.paleMossEnabled = val)
+                                        .build());
+
                         // Harvest Statistics category - with LIVE PREVIEW
                         // Changes apply immediately so you can see them in the HUD
                         ConfigCategory stats = builder.getOrCreateCategory(Component.translatable("category.cropmod.stats"));
@@ -216,8 +256,8 @@ public class CropModModMenuIntegration implements ModMenuApi {
                         stats.addEntry(new ButtonListEntry(
                                         Component.literal("Position HUD"),
                                         Component.literal("§eOpen"),
-                                        () -> net.minecraft.client.Minecraft.getInstance().gui
-                                                        .setScreen(new com.rasmus.cropmod.client.HudDragScreen())));
+                                        () -> net.minecraft.client.Minecraft.getInstance()
+                                                        .setScreenAndShow(new com.rasmus.cropmod.client.HudDragScreen())));
 
                         // Reset Session Stats button
                         stats.addEntry(new ButtonListEntry(

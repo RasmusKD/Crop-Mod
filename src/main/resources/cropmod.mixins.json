@@ -8,9 +8,11 @@
     "HarvestTrackerMixin"
   ],
   "client": [
-    "HudMixin"
+    "GuiStatsLegacyMixin",
+    "HudStatsModernMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "plugin": "com.rasmus.cropmod.CropModMixinPlugin"
 }
