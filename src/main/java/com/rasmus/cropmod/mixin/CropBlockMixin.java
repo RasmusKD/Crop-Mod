@@ -37,8 +37,6 @@ public class CropBlockMixin {
 
     @Unique
     private static final Map<Block, Item> CROP_SEED_MAP = new HashMap<>();
-    @Unique
-    private static final Map<Block, String> CROP_CONFIG_KEYS = new HashMap<>();
 
     static {
         CROP_SEED_MAP.put(Blocks.WHEAT, Items.WHEAT_SEEDS);
@@ -49,15 +47,6 @@ public class CropBlockMixin {
         CROP_SEED_MAP.put(Blocks.COCOA, Items.COCOA_BEANS);
         CROP_SEED_MAP.put(Blocks.TORCHFLOWER_CROP, Items.TORCHFLOWER_SEEDS);
         CROP_SEED_MAP.put(Blocks.PITCHER_CROP, Items.PITCHER_POD);
-
-        CROP_CONFIG_KEYS.put(Blocks.WHEAT, "wheatEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.CARROTS, "carrotsEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.POTATOES, "potatoesEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.BEETROOTS, "beetrootsEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.NETHER_WART, "netherWartEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.COCOA, "cocoaEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.TORCHFLOWER_CROP, "torchflowerEnabled");
-        CROP_CONFIG_KEYS.put(Blocks.PITCHER_CROP, "pitcherPlantEnabled");
     }
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
@@ -255,12 +244,15 @@ public class CropBlockMixin {
             return false;
         }
 
+        CropModConfig config = CropModConfig.get();
+        int threshold = config.itemThreshold;
+
         int seedCount = 0;
         for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (stack.getItem() == correspondingSeed) {
                 seedCount += stack.getCount();
             }
-            if (seedCount >= CropModConfig.get().itemThreshold) {
+            if (seedCount >= threshold) {
                 return false;
             }
         }
@@ -269,7 +261,7 @@ public class CropBlockMixin {
         ItemStack offhand = player.getOffhandItem();
         if (offhand.getItem() == correspondingSeed) {
             seedCount += offhand.getCount();
-            if (seedCount >= CropModConfig.get().itemThreshold) {
+            if (seedCount >= threshold) {
                 return false;
             }
         }
@@ -280,22 +272,24 @@ public class CropBlockMixin {
     @Unique
     private boolean isCropEnabled(Block block) {
         CropModConfig config = CropModConfig.get();
-        String configKey = CROP_CONFIG_KEYS.get(block);
-        if (configKey == null) {
-            return false; // Not a supported crop
-        }
+        if (block == Blocks.WHEAT)
+            return config.wheatEnabled;
+        if (block == Blocks.CARROTS)
+            return config.carrotsEnabled;
+        if (block == Blocks.POTATOES)
+            return config.potatoesEnabled;
+        if (block == Blocks.BEETROOTS)
+            return config.beetrootsEnabled;
+        if (block == Blocks.NETHER_WART)
+            return config.netherWartEnabled;
+        if (block == Blocks.COCOA)
+            return config.cocoaEnabled;
+        if (block == Blocks.TORCHFLOWER_CROP)
+            return config.torchflowerEnabled;
+        if (block == Blocks.PITCHER_CROP)
+            return config.pitcherPlantEnabled;
 
-        return switch (configKey) {
-            case "wheatEnabled" -> config.wheatEnabled;
-            case "carrotsEnabled" -> config.carrotsEnabled;
-            case "potatoesEnabled" -> config.potatoesEnabled;
-            case "beetrootsEnabled" -> config.beetrootsEnabled;
-            case "netherWartEnabled" -> config.netherWartEnabled;
-            case "cocoaEnabled" -> config.cocoaEnabled;
-            case "torchflowerEnabled" -> config.torchflowerEnabled;
-            case "pitcherPlantEnabled" -> config.pitcherPlantEnabled;
-            default -> false;
-        };
+        return false;
     }
 
     @Unique
