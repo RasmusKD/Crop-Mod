@@ -155,5 +155,9 @@
   "text.autoconfig.cropmod.option.protectStems": "Protect Stems",
   "text.autoconfig.cropmod.option.protectStems.@Tooltip": "Melon and pumpkin stems can't be broken, only the fruit.",
   "text.autoconfig.cropmod.option.protectBerryBushes": "Protect Berry Bushes",
-  "text.autoconfig.cropmod.option.protectBerryBushes.@Tooltip": "Sweet berry bushes can't be broken, harvest with right click."
+  "text.autoconfig.cropmod.option.protectBerryBushes.@Tooltip": "Sweet berry bushes can't be broken, harvest with right click.",
+  "option.cropmod.protectBuddingAmethyst": "Budding Amethyst",
+  "option.cropmod.protectBuddingAmethyst.tooltip": "Can't be broken, it drops nothing and never comes back",
+  "text.autoconfig.cropmod.option.protectBuddingAmethyst": "Protect Budding Amethyst",
+  "text.autoconfig.cropmod.option.protectBuddingAmethyst.@Tooltip": "Budding amethyst can't be broken. It drops nothing and never comes back."
 }

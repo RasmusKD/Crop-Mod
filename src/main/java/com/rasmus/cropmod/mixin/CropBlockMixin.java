@@ -231,6 +231,10 @@ public class CropBlockMixin {
         if (block == Blocks.SWEET_BERRY_BUSH) {
             return config.protectBerryBushes;
         }
+        if (block == Blocks.BUDDING_AMETHYST) {
+            // gone forever if broken, drops nothing even with silk touch
+            return config.protectBuddingAmethyst;
+        }
         return false;
     }
 

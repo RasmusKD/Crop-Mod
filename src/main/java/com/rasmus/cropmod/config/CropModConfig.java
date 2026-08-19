@@ -152,6 +152,10 @@ public class CropModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean protectBerryBushes = true;
 
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean protectBuddingAmethyst = true;
+
     // Harvest Statistics settings
     @ConfigEntry.Gui.Tooltip
     public boolean showHarvestStats = false;

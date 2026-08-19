@@ -155,5 +155,9 @@
   "text.autoconfig.cropmod.option.protectStems": "Beskyt stængler",
   "text.autoconfig.cropmod.option.protectStems.@Tooltip": "Melon- og græskarstængler kan ikke brydes, kun frugten.",
   "text.autoconfig.cropmod.option.protectBerryBushes": "Beskyt bærbuske",
-  "text.autoconfig.cropmod.option.protectBerryBushes.@Tooltip": "Sødbærbuske kan ikke brydes, høst med højreklik."
+  "text.autoconfig.cropmod.option.protectBerryBushes.@Tooltip": "Sødbærbuske kan ikke brydes, høst med højreklik.",
+  "option.cropmod.protectBuddingAmethyst": "Spirende ametyst",
+  "option.cropmod.protectBuddingAmethyst.tooltip": "Kan ikke brydes, den dropper intet og kommer aldrig tilbage",
+  "text.autoconfig.cropmod.option.protectBuddingAmethyst": "Beskyt spirende ametyst",
+  "text.autoconfig.cropmod.option.protectBuddingAmethyst.@Tooltip": "Spirende ametyst kan ikke brydes. Den dropper intet og kommer aldrig tilbage."
 }

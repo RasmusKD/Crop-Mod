@@ -254,6 +254,14 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .setSaveConsumer(val -> config.protectBerryBushes = val)
                                         .build());
 
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.protectBuddingAmethyst"),
+                                                        config.protectBuddingAmethyst)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.protectBuddingAmethyst.tooltip"))
+                                        .setSaveConsumer(val -> config.protectBuddingAmethyst = val)
+                                        .build());
+
                         // Harvest Statistics category - with LIVE PREVIEW
                         // Changes apply immediately so you can see them in the HUD
                         ConfigCategory stats = builder.getOrCreateCategory(Component.translatable("category.cropmod.stats"));
