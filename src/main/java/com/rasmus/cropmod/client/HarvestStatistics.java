@@ -3,6 +3,7 @@ package com.rasmus.cropmod.client;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -15,6 +16,8 @@ public class HarvestStatistics {
 
     // Total counts per crop type for the session
     private final Map<Block, Integer> sessionCounts = new HashMap<>();
+    private final Map<Block, Integer> unmodifiableSessionCounts = Collections.unmodifiableMap(sessionCounts);
+    private int totalSessionCount = 0;
 
     // Timestamps of recent harvests for per-hour calculation (rolling window)
     private final LinkedList<Long> recentHarvests = new LinkedList<>();
@@ -50,6 +53,7 @@ public class HarvestStatistics {
 
         // Update session count
         sessionCounts.merge(cropBlock, 1, (oldVal, newVal) -> oldVal + newVal);
+        totalSessionCount++;
 
         // Add to recent harvests for per-hour tracking
         recentHarvests.add(now);
@@ -68,16 +72,16 @@ public class HarvestStatistics {
      * Remove harvest timestamps older than 1 hour.
      */
     private void cleanupOldEntries(long now) {
-        long cutoff = now - ONE_HOUR_MS;
-
-        while (!recentHarvests.isEmpty() && recentHarvests.peek() < cutoff) {
-            recentHarvests.poll();
-        }
-
+        cleanupRecentList(recentHarvests, now);
         for (LinkedList<Long> list : recentHarvestsByCrop.values()) {
-            while (!list.isEmpty() && list.peek() < cutoff) {
-                list.poll();
-            }
+            cleanupRecentList(list, now);
+        }
+    }
+
+    private void cleanupRecentList(LinkedList<Long> list, long now) {
+        long cutoff = now - ONE_HOUR_MS;
+        while (!list.isEmpty() && list.peek() < cutoff) {
+            list.poll();
         }
     }
 
@@ -85,7 +89,7 @@ public class HarvestStatistics {
      * Get total crops harvested this session.
      */
     public int getTotalSessionCount() {
-        return sessionCounts.values().stream().mapToInt(Integer::intValue).sum();
+        return totalSessionCount;
     }
 
     /**
@@ -99,7 +103,7 @@ public class HarvestStatistics {
      * Get crops harvested in the last hour.
      */
     public int getHarvestsPerHour() {
-        cleanupOldEntries(System.currentTimeMillis());
+        cleanupRecentList(recentHarvests, System.currentTimeMillis());
         return recentHarvests.size();
     }
 
@@ -107,9 +111,12 @@ public class HarvestStatistics {
      * Get harvests per hour for a specific crop.
      */
     public int getHarvestsPerHour(Block cropBlock) {
-        cleanupOldEntries(System.currentTimeMillis());
         LinkedList<Long> cropList = recentHarvestsByCrop.get(cropBlock);
-        return cropList != null ? cropList.size() : 0;
+        if (cropList == null) {
+            return 0;
+        }
+        cleanupRecentList(cropList, System.currentTimeMillis());
+        return cropList.size();
     }
 
     /**
@@ -189,6 +196,7 @@ public class HarvestStatistics {
      */
     public void reset() {
         sessionCounts.clear();
+        totalSessionCount = 0;
         recentHarvests.clear();
         for (LinkedList<Long> list : recentHarvestsByCrop.values()) {
             list.clear();
@@ -200,7 +208,7 @@ public class HarvestStatistics {
      * Get map of session counts by crop for detailed display.
      */
     public Map<Block, Integer> getSessionCountsByCrop() {
-        return new HashMap<>(sessionCounts);
+        return unmodifiableSessionCounts;
     }
 
     private static Block[] getSupportedCrops() {
