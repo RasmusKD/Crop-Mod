@@ -115,6 +115,10 @@ public class CropModModMenuIntegration implements ModMenuApi {
                         ConfigCategory crops = builder.getOrCreateCategory(Component.translatable("category.cropmod.crops"));
 
                         crops.addEntry(entryBuilder
+                                        .startTextDescription(Component.translatable("section.cropmod.seedCrops"))
+                                        .build());
+
+                        crops.addEntry(entryBuilder
                                         .startBooleanToggle(Component.translatable("option.cropmod.wheatEnabled"),
                                                         config.wheatEnabled)
                                         .setDefaultValue(true)
@@ -163,6 +167,26 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .build());
 
                         crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.torchflowerEnabled"),
+                                                        config.torchflowerEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.torchflowerEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.torchflowerEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.pitcherPlantEnabled"),
+                                                        config.pitcherPlantEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.pitcherPlantEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.pitcherPlantEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startTextDescription(Component.translatable("section.cropmod.growthPoints"))
+                                        .build());
+
+                        crops.addEntry(entryBuilder
                                         .startBooleanToggle(Component.translatable("option.cropmod.sugarCaneEnabled"),
                                                         config.sugarCaneEnabled)
                                         .setDefaultValue(true)
@@ -187,6 +211,14 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .build());
 
                         crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.cactusEnabled"),
+                                                        config.cactusEnabled)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.cactusEnabled.tooltip"))
+                                        .setSaveConsumer(val -> config.cactusEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
                                         .startBooleanToggle(Component.translatable("option.cropmod.glowBerriesEnabled"),
                                                         config.glowBerriesEnabled)
                                         .setDefaultValue(true)
@@ -200,6 +232,26 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .setDefaultValue(true)
                                         .setTooltip(Component.translatable("option.cropmod.paleMossEnabled.tooltip"))
                                         .setSaveConsumer(val -> config.paleMossEnabled = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startTextDescription(Component.translatable("section.cropmod.neverBreak"))
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.protectStems"),
+                                                        config.protectStems)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.protectStems.tooltip"))
+                                        .setSaveConsumer(val -> config.protectStems = val)
+                                        .build());
+
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.protectBerryBushes"),
+                                                        config.protectBerryBushes)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.protectBerryBushes.tooltip"))
+                                        .setSaveConsumer(val -> config.protectBerryBushes = val)
                                         .build());
 
                         // Harvest Statistics category - with LIVE PREVIEW

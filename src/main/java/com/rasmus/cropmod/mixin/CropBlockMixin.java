@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -46,6 +47,8 @@ public class CropBlockMixin {
         CROP_SEED_MAP.put(Blocks.BEETROOTS, Items.BEETROOT_SEEDS);
         CROP_SEED_MAP.put(Blocks.NETHER_WART, Items.NETHER_WART);
         CROP_SEED_MAP.put(Blocks.COCOA, Items.COCOA_BEANS);
+        CROP_SEED_MAP.put(Blocks.TORCHFLOWER_CROP, Items.TORCHFLOWER_SEEDS);
+        CROP_SEED_MAP.put(Blocks.PITCHER_CROP, Items.PITCHER_POD);
 
         CROP_CONFIG_KEYS.put(Blocks.WHEAT, "wheatEnabled");
         CROP_CONFIG_KEYS.put(Blocks.CARROTS, "carrotsEnabled");
@@ -53,6 +56,8 @@ public class CropBlockMixin {
         CROP_CONFIG_KEYS.put(Blocks.BEETROOTS, "beetrootsEnabled");
         CROP_CONFIG_KEYS.put(Blocks.NETHER_WART, "netherWartEnabled");
         CROP_CONFIG_KEYS.put(Blocks.COCOA, "cocoaEnabled");
+        CROP_CONFIG_KEYS.put(Blocks.TORCHFLOWER_CROP, "torchflowerEnabled");
+        CROP_CONFIG_KEYS.put(Blocks.PITCHER_CROP, "pitcherPlantEnabled");
     }
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
@@ -215,6 +220,17 @@ public class CropBlockMixin {
             return config.paleMossEnabled
                     && level.getBlockState(pos.above()).getBlock() != Blocks.PALE_HANGING_MOSS;
         }
+        if (block == Blocks.CACTUS) {
+            return config.cactusEnabled
+                    && level.getBlockState(pos.below()).getBlock() != Blocks.CACTUS;
+        }
+        if (block == Blocks.MELON_STEM || block == Blocks.PUMPKIN_STEM
+                || block == Blocks.ATTACHED_MELON_STEM || block == Blocks.ATTACHED_PUMPKIN_STEM) {
+            return config.protectStems;
+        }
+        if (block == Blocks.SWEET_BERRY_BUSH) {
+            return config.protectBerryBushes;
+        }
         return false;
     }
 
@@ -272,6 +288,8 @@ public class CropBlockMixin {
             case "beetrootsEnabled" -> config.beetrootsEnabled;
             case "netherWartEnabled" -> config.netherWartEnabled;
             case "cocoaEnabled" -> config.cocoaEnabled;
+            case "torchflowerEnabled" -> config.torchflowerEnabled;
+            case "pitcherPlantEnabled" -> config.pitcherPlantEnabled;
             default -> false;
         };
     }
@@ -286,6 +304,8 @@ public class CropBlockMixin {
             return blockState.getValue(NetherWartBlock.AGE) < 3;
         } else if (block instanceof CocoaBlock) {
             return blockState.getValue(CocoaBlock.AGE) < 2;
+        } else if (block instanceof PitcherCropBlock) {
+            return blockState.getValue(PitcherCropBlock.AGE) < PitcherCropBlock.MAX_AGE;
         }
 
         return false;

@@ -132,6 +132,26 @@ public class CropModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean paleMossEnabled = true;
 
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean torchflowerEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean pitcherPlantEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean cactusEnabled = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean protectStems = true;
+
+    @ConfigEntry.Category("crops")
+    @ConfigEntry.Gui.Tooltip
+    public boolean protectBerryBushes = true;
+
     // Harvest Statistics settings
     @ConfigEntry.Gui.Tooltip
     public boolean showHarvestStats = false;
