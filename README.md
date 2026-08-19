@@ -15,6 +15,7 @@ Originally built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants c
 - Works with mcMMO's auto-replant
 - Visual particles show when protection kicks in
 - **Protected crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa
+- **Growth point protection:** the bottom block of Sugar Cane, Bamboo and Kelp and the top block of Glow Berry vines and Pale Hanging Moss can't be broken, so the plant keeps producing
 
 ### Harvest Control
 - Only break fully grown crops
