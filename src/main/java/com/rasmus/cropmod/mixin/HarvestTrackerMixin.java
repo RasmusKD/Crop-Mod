@@ -8,9 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CocoaBlock;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,18 +21,33 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class HarvestTrackerMixin {
 
     @Inject(method = "destroyBlock", at = @At("HEAD"))
-    private void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void cropmod$captureState(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        // The state must be read BEFORE vanilla replaces the block, but the
+        // harvest only counts if the break actually went through (see below).
+        pendingState = null;
         if (!CropModConfig.get().modEnabled) {
             return;
         }
-
         Level world = Minecraft.getInstance().level;
-
         if (world == null) {
             return;
         }
+        pendingState = world.getBlockState(pos);
+    }
 
-        BlockState state = world.getBlockState(pos);
+    @org.spongepowered.asm.mixin.Unique
+    private BlockState pendingState;
+
+    @Inject(method = "destroyBlock", at = @At("RETURN"))
+    private void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        BlockState state = pendingState;
+        pendingState = null;
+        if (state == null || !cir.getReturnValueZ()) {
+            // Failed breaks (adventure mode, unbreakable, out of range) used
+            // to count as harvests because the hook ran at HEAD and ignored
+            // the outcome.
+            return;
+        }
         Block block = state.getBlock();
 
         // Check if it's a crop we track
@@ -58,16 +70,8 @@ public class HarvestTrackerMixin {
     }
 
     private boolean isFullyGrown(BlockState state) {
-        Block block = state.getBlock();
-
-        if (block instanceof CropBlock cropBlock) {
-            return cropBlock.isMaxAge(state);
-        } else if (block instanceof NetherWartBlock) {
-            return state.getValue(NetherWartBlock.AGE) >= 3;
-        } else if (block instanceof CocoaBlock) {
-            return state.getValue(CocoaBlock.AGE) >= 2;
-        }
-
-        return true;
+        // One source of truth for maturity; a second copy of these age
+        // checks lived here and could drift from the protection logic.
+        return !com.rasmus.cropmod.CropProtection.isCropNotFullyGrown(state);
     }
 }
