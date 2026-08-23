@@ -31,6 +31,14 @@ public class CropBlockMixin {
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
     private void onHandleBlockBreaking(boolean breaking, CallbackInfo ci) {
+        // Vanilla calls continueAttack every tick with breaking=false when
+        // the button is up; there is nothing to protect then, and vanilla's
+        // own else branch (stopDestroyBlock) must run. Without this gate the
+        // cancel paths fired on mere hover - visibly so once they gained
+        // feedback effects.
+        if (!breaking) {
+            return;
+        }
         CropModConfig config = CropModConfig.get();
         if (!config.modEnabled) {
             return;
