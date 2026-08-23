@@ -23,6 +23,14 @@ public final class HarvestStatsRenderer {
 
     private static Field hideGuiField;
 
+    private static final ItemStack ITEM_WHEAT = new ItemStack(Items.WHEAT);
+    private static final ItemStack ITEM_CARROT = new ItemStack(Items.CARROT);
+    private static final ItemStack ITEM_POTATO = new ItemStack(Items.POTATO);
+    private static final ItemStack ITEM_BEETROOT = new ItemStack(Items.BEETROOT);
+    private static final ItemStack ITEM_NETHER_WART = new ItemStack(Items.NETHER_WART);
+    private static final ItemStack ITEM_COCOA_BEANS = new ItemStack(Items.COCOA_BEANS);
+    private static final ItemStack ITEM_BARRIER = new ItemStack(Items.BARRIER);
+
     private HarvestStatsRenderer() {
     }
 
@@ -82,8 +90,12 @@ public final class HarvestStatsRenderer {
 
         // Calculate max width of all entries (icon + text)
         int maxTextWidth = 0;
-        for (Map.Entry<Block, Integer> entry : sortedCrops) {
+        int cropCount = sortedCrops.size();
+        String[] displayTexts = new String[cropCount];
+        for (int i = 0; i < cropCount; i++) {
+            Map.Entry<Block, Integer> entry = sortedCrops.get(i);
             String text = buildDisplayText(entry.getValue(), entry.getKey(), stats, config.statsDisplayMode);
+            displayTexts[i] = text;
             int textWidth = textRenderer.width(text);
             if (textWidth > maxTextWidth) {
                 maxTextWidth = textWidth;
@@ -99,7 +111,7 @@ public final class HarvestStatsRenderer {
         // Calculate scaled dimensions for positioning
         int scaledWidth = (int) (screenWidth / scale);
         int scaledHeight = (int) (screenHeight / scale);
-        int hudHeight = sortedCrops.size() * 18;
+        int hudHeight = cropCount * 18;
 
         // Use custom position if set (stored as percentage 0.0-1.0), otherwise use
         // preset position
@@ -126,12 +138,12 @@ public final class HarvestStatsRenderer {
         int lineHeight = 18;
         int currentY = baseY;
 
-        for (Map.Entry<Block, Integer> entry : sortedCrops) {
+        for (int i = 0; i < cropCount; i++) {
+            Map.Entry<Block, Integer> entry = sortedCrops.get(i);
             Block cropBlock = entry.getKey();
-            int count = entry.getValue();
 
             // Get the item to display
-            ItemStack itemStack = new ItemStack(getCropItem(cropBlock));
+            ItemStack itemStack = getCropItemStack(cropBlock);
 
             // Draw background if enabled
             if (config.statsShowBackground) {
@@ -141,11 +153,8 @@ public final class HarvestStatsRenderer {
             // Draw item icon (16x16)
             context.item(itemStack, baseX, currentY - 1);
 
-            // Build text based on display mode
-            String countText = buildDisplayText(count, cropBlock, stats, config.statsDisplayMode);
-
             // Draw count text - white with full alpha
-            context.text(textRenderer, countText, baseX + 18, currentY + 3, 0xFFFFFFFF, true);
+            context.text(textRenderer, displayTexts[i], baseX + 18, currentY + 3, 0xFFFFFFFF, true);
 
             currentY += lineHeight;
         }
@@ -178,21 +187,21 @@ public final class HarvestStatsRenderer {
     }
 
     /**
-     * Get the item that represents a crop for display.
+     * Get the item stack that represents a crop for display.
      */
-    private static Item getCropItem(Block cropBlock) {
+    private static ItemStack getCropItemStack(Block cropBlock) {
         if (cropBlock == Blocks.WHEAT)
-            return Items.WHEAT;
+            return ITEM_WHEAT;
         if (cropBlock == Blocks.CARROTS)
-            return Items.CARROT;
+            return ITEM_CARROT;
         if (cropBlock == Blocks.POTATOES)
-            return Items.POTATO;
+            return ITEM_POTATO;
         if (cropBlock == Blocks.BEETROOTS)
-            return Items.BEETROOT;
+            return ITEM_BEETROOT;
         if (cropBlock == Blocks.NETHER_WART)
-            return Items.NETHER_WART;
+            return ITEM_NETHER_WART;
         if (cropBlock == Blocks.COCOA)
-            return Items.COCOA_BEANS;
-        return Items.BARRIER; // Fallback
+            return ITEM_COCOA_BEANS;
+        return ITEM_BARRIER; // Fallback
     }
 }
