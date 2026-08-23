@@ -263,7 +263,6 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .build());
 
                         // Harvest Statistics category - with LIVE PREVIEW
-                        // Changes apply immediately so you can see them in the HUD
                         ConfigCategory stats = builder.getOrCreateCategory(Component.translatable("category.cropmod.stats"));
 
                         stats.addEntry(entryBuilder
@@ -307,17 +306,16 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                                         config.statsMaxCrops, 1, 10)
                                         .setDefaultValue(3)
                                         .setTooltip(Component.translatable("option.cropmod.statsMaxCrops.tooltip"))
-                                        .setSaveConsumer(val -> {
-                                                config.statsMaxCrops = val;
-                                                config.previewMaxCrops = val;
-                                        })
+                                        .setSaveConsumer(val -> config.statsMaxCrops = val)
                                         .build());
                         // Position HUD button
                         stats.addEntry(new ButtonListEntry(
                                         Component.literal("Position HUD"),
                                         Component.literal("§eOpen"),
                                         () -> net.minecraft.client.Minecraft.getInstance()
-                                                        .setScreenAndShow(new com.rasmus.cropmod.client.HudDragScreen())));
+                                                        .setScreenAndShow(new com.rasmus.cropmod.client.HudDragScreen(
+                                                        com.rasmus.cropmod.client.CropModClient.currentScreen(
+                                                                        net.minecraft.client.Minecraft.getInstance())))));
 
                         // Reset Session Stats button
                         stats.addEntry(new ButtonListEntry(

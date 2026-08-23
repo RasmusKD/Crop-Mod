@@ -35,7 +35,15 @@ public final class HarvestStatsRenderer {
     }
 
     /** 26.1 only: reads Options.hideGui by reflection, the field is gone in 26.2. */
+    private static boolean hideGuiLookupFailed;
+
     public static boolean legacyHudHidden() {
+        // Failure is cached (no per-frame exception construction) and fails
+        // CLOSED: if we cannot read the flag, suppress the overlay rather
+        // than drawing over an F1-hidden interface.
+        if (hideGuiLookupFailed) {
+            return true;
+        }
         var options = Minecraft.getInstance().options;
         try {
             if (hideGuiField == null) {
@@ -43,7 +51,8 @@ public final class HarvestStatsRenderer {
             }
             return hideGuiField.getBoolean(options);
         } catch (ReflectiveOperationException e) {
-            return false;
+            hideGuiLookupFailed = true;
+            return true;
         }
     }
 
@@ -202,6 +211,6 @@ public final class HarvestStatsRenderer {
             return ITEM_NETHER_WART;
         if (cropBlock == Blocks.COCOA)
             return ITEM_COCOA_BEANS;
-        return ITEM_BARRIER; // Fallback
+        return ITEM_BARRIER; // visible the day TRACKED_CROPS grows past this table
     }
 }

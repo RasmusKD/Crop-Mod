@@ -32,10 +32,10 @@ Originally built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants c
 - Per-minute rate calculation
 - Draggable position (Ctrl+H)
 - Configurable scale and display mode
-- **Tracked crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa, Pumpkin, Melon, Sweet Berries, Sugar Cane, Bamboo, Kelp, Cactus, Chorus, Glow Berries, Torchflower, Pitcher Plant
+- **Tracked crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa (protection covers many more plants; the statistics track these six)
 
 ### Keybinds
-- **P**: Toggle crop protection
+- **B**: Toggle crop protection
 - **O**: Toggle camera snap
 - **H**: Toggle stats HUD
 - **Shift+H**: Reset session stats
@@ -43,7 +43,7 @@ Originally built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants c
 
 ## Configuration
 
-All settings accessible via ModMenu. Changes apply immediately.
+All settings accessible via ModMenu.
 
 ## Dependencies
 

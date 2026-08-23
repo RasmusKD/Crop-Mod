@@ -11,47 +11,6 @@ public class CropModConfig implements ConfigData {
 
     // LIVE PREVIEW: These transient fields hold real-time values when config screen
     // is open
-    @ConfigEntry.Gui.Excluded
-    public transient StatsDisplayMode previewDisplayMode = null;
-    @ConfigEntry.Gui.Excluded
-    public transient StatsPosition previewPosition = null;
-    @ConfigEntry.Gui.Excluded
-    public transient Float previewScale = null;
-    @ConfigEntry.Gui.Excluded
-    public transient Boolean previewShowBackground = null;
-    @ConfigEntry.Gui.Excluded
-    public transient Integer previewMaxCrops = null;
-
-    // Getters that return preview value if set, otherwise saved value
-    public StatsDisplayMode getDisplayMode() {
-        return previewDisplayMode != null ? previewDisplayMode : statsDisplayMode;
-    }
-
-    public StatsPosition getPosition() {
-        return previewPosition != null ? previewPosition : statsPosition;
-    }
-
-    public float getScale() {
-        return previewScale != null ? previewScale : statsScale;
-    }
-
-    public boolean getShowBackground() {
-        return previewShowBackground != null ? previewShowBackground : statsShowBackground;
-    }
-
-    public int getMaxCrops() {
-        return previewMaxCrops != null ? previewMaxCrops : statsMaxCrops;
-    }
-
-    // Clear preview values (called when screen closes)
-    public void clearPreview() {
-        previewDisplayMode = null;
-        previewPosition = null;
-        previewScale = null;
-        previewShowBackground = null;
-        previewMaxCrops = null;
-    }
-
     // Master toggle for the entire mod
     @ConfigEntry.Gui.Tooltip
     public boolean modEnabled = true;
@@ -70,10 +29,10 @@ public class CropModConfig implements ConfigData {
     public boolean requireHoeToBreakCrops = false;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean showProtectionParticles = false; // Changed to false by default
+    public boolean showProtectionParticles = true;
 
     @ConfigEntry.Gui.Tooltip
-    public boolean playProtectionSounds = false; // Changed to false by default
+    public boolean playProtectionSounds = true;
 
     // Camera snap settings moved to bottom
     @ConfigEntry.Gui.Tooltip
@@ -164,10 +123,6 @@ public class CropModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public StatsDisplayMode statsDisplayMode = StatsDisplayMode.SESSION_MIN;
 
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    @ConfigEntry.Gui.Tooltip
-    public StatsPosition statsPosition = StatsPosition.TOP_LEFT;
-
     @ConfigEntry.Gui.Tooltip
     public float statsScale = 1.0f;
 
@@ -199,13 +154,6 @@ public class CropModConfig implements ConfigData {
         PER_MIN,
         SESSION_HOUR,
         SESSION_MIN
-    }
-
-    public enum StatsPosition {
-        TOP_LEFT,
-        TOP_RIGHT,
-        BOTTOM_LEFT,
-        BOTTOM_RIGHT
     }
 
     public static void register() {

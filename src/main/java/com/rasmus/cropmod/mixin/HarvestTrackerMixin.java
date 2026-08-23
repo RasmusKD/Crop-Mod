@@ -6,7 +6,6 @@ import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +37,7 @@ public class HarvestTrackerMixin {
     private BlockState pendingState;
 
     @Inject(method = "destroyBlock", at = @At("RETURN"))
-    private void onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+    private void cropmod$onBreakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
         BlockState state = pendingState;
         pendingState = null;
         if (state == null || !cir.getReturnValueZ()) {
@@ -50,26 +49,28 @@ public class HarvestTrackerMixin {
         Block block = state.getBlock();
 
         // Check if it's a crop we track
-        if (isSupportedCrop(block)) {
+        if (cropmod$isSupportedCrop(block)) {
             // Only count if it was fully grown (if that setting is enabled, it would have
             // been blocked otherwise)
-            if (!CropModConfig.get().onlyHarvestFullyGrown || isFullyGrown(state)) {
+            if (!CropModConfig.get().onlyHarvestFullyGrown || cropmod$isFullyGrown(state)) {
                 com.rasmus.cropmod.client.PendingHarvests.add(pos, block,
                         Minecraft.getInstance().level.getGameTime());
             }
         }
     }
 
-    private boolean isSupportedCrop(Block block) {
-        return block == Blocks.WHEAT ||
-                block == Blocks.CARROTS ||
-                block == Blocks.POTATOES ||
-                block == Blocks.BEETROOTS ||
-                block == Blocks.NETHER_WART ||
-                block == Blocks.COCOA;
+    @org.spongepowered.asm.mixin.Unique
+    private boolean cropmod$isSupportedCrop(Block block) {
+        for (Block crop : com.rasmus.cropmod.client.HarvestStatistics.TRACKED_CROPS) {
+            if (block == crop) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean isFullyGrown(BlockState state) {
+    @org.spongepowered.asm.mixin.Unique
+    private boolean cropmod$isFullyGrown(BlockState state) {
         // One source of truth for maturity; a second copy of these age
         // checks lived here and could drift from the protection logic.
         return !com.rasmus.cropmod.CropProtection.isCropNotFullyGrown(state);

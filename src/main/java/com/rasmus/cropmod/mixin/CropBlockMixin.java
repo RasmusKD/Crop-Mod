@@ -56,6 +56,7 @@ public class CropBlockMixin {
 
         // Growth point protection: never break the block the plant regrows from
         if (CropProtection.isProtectedGrowthPoint(blockPos, block)) {
+            showProtectionEffects(client, blockPos);
             cropmod$abortBreak(client);
             ci.cancel();
             return;
@@ -65,6 +66,7 @@ public class CropBlockMixin {
         if (CropProtection.isCropEnabled(block)) {
             // Hoe requirement logic
             if (config.requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
+                showProtectionEffects(client, blockPos);
                 cropmod$abortBreak(client);
                 ci.cancel();
                 return;
@@ -81,6 +83,7 @@ public class CropBlockMixin {
 
             // Require seeds in inventory logic
             if (config.requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
+                showProtectionEffects(client, blockPos);
                 cropmod$abortBreak(client);
                 ci.cancel();
                 return;
@@ -88,6 +91,7 @@ public class CropBlockMixin {
 
             // Only harvest fully grown logic
             if (config.onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
+                showProtectionEffects(client, blockPos);
                 cropmod$abortBreak(client);
                 ci.cancel();
                 return;
@@ -208,7 +212,20 @@ public class CropBlockMixin {
     }
 
     @Unique
+    private long cropmod$lastEffectMs;
+    @Unique
+    private BlockPos cropmod$lastEffectPos;
+
+    @Unique
     private void showProtectionEffects(Minecraft client, BlockPos blockPos) {
+        // continueAttack cancels fire every tick while the button is held;
+        // without a throttle the feedback would be a strobe.
+        long now = System.currentTimeMillis();
+        if (blockPos.equals(cropmod$lastEffectPos) && now - cropmod$lastEffectMs < 600L) {
+            return;
+        }
+        cropmod$lastEffectMs = now;
+        cropmod$lastEffectPos = blockPos.immutable();
         // Show particles if enabled
         if (CropModConfig.get().showProtectionParticles) {
             spawnProtectionParticles(client, blockPos);
@@ -236,7 +253,9 @@ public class CropBlockMixin {
         boolean isCocoa = blockState.getBlock() instanceof CocoaBlock;
 
         // Four corner posts that match the crop height
-        for (double h = 0; h <= cropHeight; h += 0.2) {
+        int rings = (int) Math.round(cropHeight / 0.2);
+        for (int ring = 0; ring <= rings; ring++) {
+            double h = ring * 0.2;
             // Northwest corner
             client.particleEngine.createParticle(ParticleTypes.ENCHANT, x, y + h, z, 0, 0, 0);
             // Northeast corner

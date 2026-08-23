@@ -11,6 +11,47 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public class CropModClient implements ClientModInitializer {
+
+    // 26.1 exposes the current screen as the public field Minecraft.screen,
+    // 26.2 as the method Minecraft.screen(). A direct reference to either is
+    // a NoSuchFieldError/NoSuchMethodError on the other version, so the
+    // lookup happens once by name (same pattern as Rare Fish Finder 2.5.3).
+    private static java.lang.reflect.Method screenMethod;
+    private static java.lang.reflect.Field screenField;
+    private static boolean screenLookupFailed;
+
+    public static net.minecraft.client.gui.screens.Screen currentScreen(net.minecraft.client.Minecraft client) {
+        if (screenLookupFailed) {
+            return null;
+        }
+        try {
+            if (screenMethod == null && screenField == null) {
+                try {
+                    screenMethod = net.minecraft.client.Minecraft.class.getMethod("screen");
+                } catch (NoSuchMethodException e) {
+                    screenField = net.minecraft.client.Minecraft.class.getField("screen");
+                }
+            }
+            Object result = screenMethod != null ? screenMethod.invoke(client) : screenField.get(client);
+            return (net.minecraft.client.gui.screens.Screen) result;
+        } catch (ReflectiveOperationException e) {
+            screenLookupFailed = true;
+            return null;
+        }
+    }
+
+    private static boolean modifierDown(net.minecraft.client.Minecraft client, int left, int right) {
+        return InputConstants.isKeyDown(client.getWindow(), left)
+                || InputConstants.isKeyDown(client.getWindow(), right);
+    }
+
+    private static boolean shiftDown(net.minecraft.client.Minecraft client) {
+        return modifierDown(client, 340, 344); // GLFW LEFT/RIGHT SHIFT
+    }
+
+    private static boolean ctrlDown(net.minecraft.client.Minecraft client) {
+        return modifierDown(client, 341, 345); // GLFW LEFT/RIGHT CONTROL
+    }
     private static KeyMapping toggleModKeyBinding;
     private static KeyMapping toggleCameraSnapKeyBinding;
     private static KeyMapping toggleStatsKeyBinding;
@@ -86,15 +127,15 @@ public class CropModClient implements ClientModInitializer {
                 CropModConfig config = CropModConfig.get();
 
                 // If shift is held, reset stats
-                if (client.options.keyShift.isDown()) {
+                if (shiftDown(client)) {
                     HarvestStatistics.getInstance().reset();
                     if (client.player != null) {
                         client.player.sendSystemMessage(Component.literal("§6Harvest statistics reset!"));
                     }
                 }
                 // If control/sprint is held, open drag screen
-                else if (client.options.keySprint.isDown()) {
-                    client.setScreenAndShow(new HudDragScreen());
+                else if (ctrlDown(client)) {
+                    client.setScreenAndShow(new HudDragScreen(currentScreen(client)));
                 } else {
                     config.showHarvestStats = !config.showHarvestStats;
                     AutoConfig.getConfigHolder(CropModConfig.class).save();

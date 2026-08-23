@@ -29,11 +29,26 @@ public class HarvestStatistics {
     // One hour in milliseconds
     private static final long ONE_HOUR_MS = 60 * 60 * 1000;
 
+    /**
+     * The one list of tracked crops; the break tracker and the HUD icon
+     * table derive from it, so adding a crop is one edit, not three
+     * (three separate lists used to drift silently).
+     */
+    public static final Block[] TRACKED_CROPS = {
+            Blocks.WHEAT,
+            Blocks.CARROTS,
+            Blocks.POTATOES,
+            Blocks.BEETROOTS,
+            Blocks.NETHER_WART,
+            Blocks.COCOA
+    };
+
     private HarvestStatistics() {
-        // Initialize crop-specific lists
-        for (Block crop : getSupportedCrops()) {
-            recentHarvestsByCrop.put(crop, new LinkedList<>());
-        }
+    }
+
+    /** Monotonic milliseconds: rate windows must not follow wall-clock steps. */
+    private static long monotonicMs() {
+        return System.nanoTime() / 1_000_000L;
     }
 
     public static HarvestStatistics getInstance() {
@@ -44,7 +59,7 @@ public class HarvestStatistics {
      * Record a successful harvest of a crop.
      */
     public void recordHarvest(Block cropBlock) {
-        long now = System.currentTimeMillis();
+        long now = monotonicMs();
 
         // Start session timer on first harvest
         if (sessionStartTime == null) {
@@ -58,11 +73,9 @@ public class HarvestStatistics {
         // Add to recent harvests for per-hour tracking
         recentHarvests.add(now);
 
-        // Add to crop-specific list
-        LinkedList<Long> cropList = recentHarvestsByCrop.get(cropBlock);
-        if (cropList != null) {
-            cropList.add(now);
-        }
+        // Add to crop-specific list; created lazily so an added crop
+        // degrades to "works" instead of "session count without a rate"
+        recentHarvestsByCrop.computeIfAbsent(cropBlock, b -> new LinkedList<>()).add(now);
 
         // Cleanup old entries (older than 1 hour)
         cleanupOldEntries(now);
@@ -103,7 +116,7 @@ public class HarvestStatistics {
      * Get crops harvested in the last hour.
      */
     public int getHarvestsPerHour() {
-        cleanupRecentList(recentHarvests, System.currentTimeMillis());
+        cleanupRecentList(recentHarvests, monotonicMs());
         return recentHarvests.size();
     }
 
@@ -115,7 +128,7 @@ public class HarvestStatistics {
         if (cropList == null) {
             return 0;
         }
-        cleanupRecentList(cropList, System.currentTimeMillis());
+        cleanupRecentList(cropList, monotonicMs());
         return cropList.size();
     }
 
@@ -127,7 +140,7 @@ public class HarvestStatistics {
         if (sessionStartTime == null)
             return 0;
 
-        long elapsedMs = System.currentTimeMillis() - sessionStartTime;
+        long elapsedMs = monotonicMs() - sessionStartTime;
         int total = getTotalSessionCount();
         if (total == 0 || elapsedMs < 1000)
             return 0;
@@ -136,8 +149,7 @@ public class HarvestStatistics {
         double minutes = elapsedMs / 60000.0;
         int rate = (int) Math.round(total / minutes);
 
-        // Cap at actual count - can't show more than you've harvested
-        return Math.min(rate, total);
+        return rate;
     }
 
     /**
@@ -148,7 +160,7 @@ public class HarvestStatistics {
         if (sessionStartTime == null)
             return 0;
 
-        long elapsedMs = System.currentTimeMillis() - sessionStartTime;
+        long elapsedMs = monotonicMs() - sessionStartTime;
         int count = getSessionCount(cropBlock);
         if (count == 0 || elapsedMs < 1000)
             return 0;
@@ -156,8 +168,7 @@ public class HarvestStatistics {
         double minutes = elapsedMs / 60000.0;
         int rate = (int) Math.round(count / minutes);
 
-        // Cap at actual count
-        return Math.min(rate, count);
+        return rate;
     }
 
     /**
@@ -166,29 +177,7 @@ public class HarvestStatistics {
     public long getSessionDurationMinutes() {
         if (sessionStartTime == null)
             return 0;
-        return (System.currentTimeMillis() - sessionStartTime) / (60 * 1000);
-    }
-
-    /**
-     * Get a formatted string showing session stats.
-     */
-    public String getSessionStatsString() {
-        int total = getTotalSessionCount();
-        long minutes = getSessionDurationMinutes();
-
-        if (minutes < 1) {
-            return String.format("§a%d §fcrops", total);
-        }
-
-        return String.format("§a%d §fcrops §7(%.1f/min)", total, (double) total / minutes);
-    }
-
-    /**
-     * Get a formatted string showing per-hour stats.
-     */
-    public String getPerHourStatsString() {
-        int perHour = getHarvestsPerHour();
-        return String.format("§a%d §f/hr", perHour);
+        return (monotonicMs() - sessionStartTime) / (60 * 1000);
     }
 
     /**
@@ -201,7 +190,7 @@ public class HarvestStatistics {
         for (LinkedList<Long> list : recentHarvestsByCrop.values()) {
             list.clear();
         }
-        sessionStartTime = System.currentTimeMillis();
+        sessionStartTime = monotonicMs();
     }
 
     /**
@@ -209,33 +198,6 @@ public class HarvestStatistics {
      */
     public Map<Block, Integer> getSessionCountsByCrop() {
         return unmodifiableSessionCounts;
-    }
-
-    private static Block[] getSupportedCrops() {
-        return new Block[] {
-                Blocks.WHEAT,
-                Blocks.CARROTS,
-                Blocks.POTATOES,
-                Blocks.BEETROOTS,
-                Blocks.NETHER_WART,
-                Blocks.COCOA,
-                Blocks.PUMPKIN,
-                Blocks.MELON,
-                Blocks.SWEET_BERRY_BUSH,
-                Blocks.SUGAR_CANE,
-                Blocks.BAMBOO,
-                Blocks.KELP,
-                Blocks.KELP_PLANT,
-                Blocks.CACTUS,
-                Blocks.CHORUS_PLANT,
-                Blocks.CHORUS_FLOWER,
-                Blocks.CAVE_VINES,
-                Blocks.CAVE_VINES_PLANT,
-                Blocks.TORCHFLOWER,
-                Blocks.TORCHFLOWER_CROP,
-                Blocks.PITCHER_PLANT,
-                Blocks.PITCHER_CROP
-        };
     }
 
     /**

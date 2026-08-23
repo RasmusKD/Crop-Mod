@@ -104,13 +104,15 @@ public final class CropProtection {
                     && level.getBlockState(pos.below()).getBlock() != Blocks.KELP_PLANT;
         }
         if (block == Blocks.CAVE_VINES || block == Blocks.CAVE_VINES_PLANT) {
-            Block above = level.getBlockState(pos.above()).getBlock();
-            return config.glowBerriesEnabled
-                    && above != Blocks.CAVE_VINES && above != Blocks.CAVE_VINES_PLANT;
+            // Glow berries are harvested by right-click (CaveVines.use), so
+            // breaking any vine block is never the harvest action - protect
+            // the whole plant outright, like berry bushes. This also covers
+            // the growing tip, which the old anchor-only check left open
+            // (the head grows DOWN; the anchor is the top).
+            return config.glowBerriesEnabled;
         }
         if (block == Blocks.PALE_HANGING_MOSS) {
-            return config.paleMossEnabled
-                    && level.getBlockState(pos.above()).getBlock() != Blocks.PALE_HANGING_MOSS;
+            return config.paleMossEnabled;
         }
         if (block == Blocks.CACTUS) {
             return config.cactusEnabled
@@ -196,9 +198,9 @@ public final class CropProtection {
         if (block instanceof CropBlock cropBlock) {
             return !cropBlock.isMaxAge(blockState);
         } else if (block instanceof NetherWartBlock) {
-            return blockState.getValue(NetherWartBlock.AGE) < 3;
+            return blockState.getValue(NetherWartBlock.AGE) < NetherWartBlock.MAX_AGE;
         } else if (block instanceof CocoaBlock) {
-            return blockState.getValue(CocoaBlock.AGE) < 2;
+            return blockState.getValue(CocoaBlock.AGE) < CocoaBlock.MAX_AGE;
         } else if (block instanceof PitcherCropBlock) {
             return blockState.getValue(PitcherCropBlock.AGE) < PitcherCropBlock.MAX_AGE;
         }
