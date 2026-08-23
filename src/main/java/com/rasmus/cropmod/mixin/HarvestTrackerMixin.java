@@ -1,6 +1,5 @@
 package com.rasmus.cropmod.mixin;
 
-import com.rasmus.cropmod.client.HarvestStatistics;
 import com.rasmus.cropmod.config.CropModConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -55,7 +54,8 @@ public class HarvestTrackerMixin {
             // Only count if it was fully grown (if that setting is enabled, it would have
             // been blocked otherwise)
             if (!CropModConfig.get().onlyHarvestFullyGrown || isFullyGrown(state)) {
-                HarvestStatistics.getInstance().recordHarvest(block);
+                com.rasmus.cropmod.client.PendingHarvests.add(pos, block,
+                        Minecraft.getInstance().level.getGameTime());
             }
         }
     }

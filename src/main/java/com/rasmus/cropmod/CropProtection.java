@@ -53,6 +53,12 @@ public final class CropProtection {
         if (level == null || player == null) {
             return false;
         }
+        // Creative needs no seed protection, spectators cannot break blocks;
+        // note GameType.isSurvival() also covers ADVENTURE, so the gate keys
+        // on abilities and spectator state instead.
+        if (player.isSpectator() || player.getAbilities().instabuild) {
+            return false;
+        }
         BlockState state = level.getBlockState(pos);
         Block block = state.getBlock();
         if (isProtectedGrowthPoint(pos, block)) {

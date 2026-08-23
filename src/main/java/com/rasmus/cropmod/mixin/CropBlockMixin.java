@@ -31,8 +31,8 @@ public class CropBlockMixin {
 
     @Inject(method = "continueAttack", at = @At("HEAD"), cancellable = true)
     private void onHandleBlockBreaking(boolean breaking, CallbackInfo ci) {
-        // Check if mod is enabled first
-        if (!CropModConfig.get().modEnabled) {
+        CropModConfig config = CropModConfig.get();
+        if (!config.modEnabled) {
             return;
         }
 
@@ -41,6 +41,11 @@ public class CropBlockMixin {
 
         if (player == null || client.level == null || client.hitResult == null ||
                 client.hitResult.getType() != HitResult.Type.BLOCK) {
+            return;
+        }
+        // Creative does not need seed protection and spectators cannot break
+        // anything; running the checks there only produces false positives.
+        if (player.isSpectator() || player.getAbilities().instabuild) {
             return;
         }
 
@@ -51,6 +56,7 @@ public class CropBlockMixin {
 
         // Growth point protection: never break the block the plant regrows from
         if (CropProtection.isProtectedGrowthPoint(blockPos, block)) {
+            cropmod$abortBreak(client);
             ci.cancel();
             return;
         }
@@ -58,36 +64,39 @@ public class CropBlockMixin {
         // Only apply CropMod features to enabled crops
         if (CropProtection.isCropEnabled(block)) {
             // Hoe requirement logic
-            if (CropModConfig.get().requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
+            if (config.requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
+                cropmod$abortBreak(client);
                 ci.cancel();
                 return;
             }
 
             // Camera snap logic
-            if (CropModConfig.get().cameraSnapEnabled &&
-                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.ALWAYS) {
-                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+            if (config.cameraSnapEnabled &&
+                    config.cameraSnapMode == CropModConfig.CameraSnapMode.ALWAYS) {
+                if (config.cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
                         isFacingSameRow(player, blockPos)) {
                     snapCameraToNearest90Degrees(player);
                 }
             }
 
             // Require seeds in inventory logic
-            if (CropModConfig.get().requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
+            if (config.requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
+                cropmod$abortBreak(client);
                 ci.cancel();
                 return;
             }
 
             // Only harvest fully grown logic
-            if (CropModConfig.get().onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
+            if (config.onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
+                cropmod$abortBreak(client);
                 ci.cancel();
                 return;
             }
 
             // Camera snap on break
-            if (breaking && CropModConfig.get().cameraSnapEnabled &&
-                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
-                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+            if (breaking && config.cameraSnapEnabled &&
+                    config.cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
+                if (config.cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
                         isFacingSameRow(player, blockPos)) {
                     snapCameraToNearest90Degrees(player);
                 }
@@ -97,8 +106,8 @@ public class CropBlockMixin {
 
     @Inject(method = "startAttack", at = @At("HEAD"), cancellable = true)
     private void onDoAttack(CallbackInfoReturnable<Boolean> cir) {
-        // Check if mod is enabled first
-        if (!CropModConfig.get().modEnabled) {
+        CropModConfig config = CropModConfig.get();
+        if (!config.modEnabled) {
             return;
         }
 
@@ -107,6 +116,9 @@ public class CropBlockMixin {
 
         if (player == null || client.level == null || client.hitResult == null ||
                 client.hitResult.getType() != HitResult.Type.BLOCK) {
+            return;
+        }
+        if (player.isSpectator() || player.getAbilities().instabuild) {
             return;
         }
 
@@ -118,6 +130,7 @@ public class CropBlockMixin {
         // Growth point protection: never break the block the plant regrows from
         if (CropProtection.isProtectedGrowthPoint(blockPos, block)) {
             showProtectionEffects(client, blockPos);
+            cropmod$abortBreak(client);
             cir.cancel();
             return;
         }
@@ -125,32 +138,38 @@ public class CropBlockMixin {
         // Only apply CropMod features to enabled crops
         if (CropProtection.isCropEnabled(block)) {
             // Hoe requirement logic
-            if (CropModConfig.get().requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
+            if (config.requireHoeToBreakCrops && !CropProtection.isHoldingHoe(player)) {
                 showProtectionEffects(client, blockPos);
+                cropmod$abortBreak(client);
                 cir.cancel();
                 return;
             }
 
-            // Camera snap on break
-            if (CropModConfig.get().cameraSnapEnabled &&
-                    CropModConfig.get().cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
-                if (CropModConfig.get().cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
-                        isFacingSameRow(player, blockPos)) {
-                    snapCameraToNearest90Degrees(player);
-                }
-            }
-
             // Require seeds in inventory logic
-            if (CropModConfig.get().requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
+            if (config.requireSeedsInInventory && CropProtection.shouldCancelAttack(player, blockState)) {
                 showProtectionEffects(client, blockPos);
+                cropmod$abortBreak(client);
                 cir.cancel();
                 return;
             }
 
             // Only harvest fully grown logic
-            if (CropModConfig.get().onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
+            if (config.onlyHarvestFullyGrown && CropProtection.isCropNotFullyGrown(blockState)) {
                 showProtectionEffects(client, blockPos);
+                cropmod$abortBreak(client);
                 cir.cancel();
+                return;
+            }
+
+            // Camera snap on break: after every cancel, so the view never
+            // yanks for a break that was just refused (the continueAttack
+            // path already orders it this way).
+            if (config.cameraSnapEnabled &&
+                    config.cameraSnapMode == CropModConfig.CameraSnapMode.BREAK) {
+                if (config.cameraSnapDirectionMode == CropModConfig.CameraSnapDirectionMode.ALWAYS ||
+                        isFacingSameRow(player, blockPos)) {
+                    snapCameraToNearest90Degrees(player);
+                }
             }
         }
     }
@@ -166,11 +185,26 @@ public class CropBlockMixin {
         };
     }
 
+    /**
+     * The cleanup vanilla performs when the player stops mining. Cancelling
+     * continueAttack at HEAD skips the only call site of stopDestroyBlock
+     * (the else branch in Minecraft.continueAttack), which used to leave the
+     * client stuck in isDestroying and the server finishing a break the
+     * player had abandoned - the protection itself caused unwanted breaks.
+     */
+    @Unique
+    private void cropmod$abortBreak(Minecraft client) {
+        if (client.gameMode != null) {
+            client.gameMode.stopDestroyBlock();
+        }
+    }
+
     @Unique
     private void snapCameraToNearest90Degrees(Player player) {
         float yaw = player.getYRot();
         float snappedYaw = Math.round(yaw / 90.0f) * 90.0f;
         player.setYRot(snappedYaw);
+        player.yRotO = snappedYaw; // no cross-tick interpolation: a snap, not a glide
     }
 
     @Unique

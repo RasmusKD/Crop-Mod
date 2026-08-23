@@ -45,6 +45,15 @@ public class CropModClient implements ClientModInitializer {
                         72, // H key
                         CROPMOD_CATEGORY));
 
+        // Harvest counts confirm here a few ticks after the predicted break,
+        // so server-rejected breaks never reach the statistics.
+        ClientTickEvents.END_CLIENT_TICK.register(PendingHarvests::tick);
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register(
+                (handler, sender, client) -> {
+                    PendingHarvests.clear();
+                    HarvestStatistics.getInstance().reset();
+                });
+
         // Register tick event for key handling
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleModKeyBinding.consumeClick()) {

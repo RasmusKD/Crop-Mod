@@ -15,9 +15,18 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 public class CropModMixinPlugin implements IMixinConfigPlugin {
 
     private static boolean isLegacyGui() {
-        String version = FabricLoader.getInstance().getModContainer("minecraft")
-                .map(c -> c.getMetadata().getVersion().getFriendlyString()).orElse("");
-        return version.startsWith("26.1");
+        // A real version predicate, not a display-string prefix: "26.10"
+        // startsWith "26.1" and would silently bind the legacy mixin to
+        // whatever Gui looks like by then.
+        return FabricLoader.getInstance().getModContainer("minecraft")
+                .map(c -> {
+                    try {
+                        return net.fabricmc.loader.api.metadata.version.VersionPredicate.parse("<26.2")
+                                .test(c.getMetadata().getVersion());
+                    } catch (net.fabricmc.loader.api.VersionParsingException e) {
+                        return false;
+                    }
+                }).orElse(false);
     }
 
     @Override
