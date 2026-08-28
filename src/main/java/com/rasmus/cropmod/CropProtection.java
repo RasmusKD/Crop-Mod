@@ -104,15 +104,20 @@ public final class CropProtection {
                     && level.getBlockState(pos.below()).getBlock() != Blocks.KELP_PLANT;
         }
         if (block == Blocks.CAVE_VINES || block == Blocks.CAVE_VINES_PLANT) {
-            // Glow berries are harvested by right-click (CaveVines.use), so
-            // breaking any vine block is never the harvest action - protect
-            // the whole plant outright, like berry bushes. This also covers
-            // the growing tip, which the old anchor-only check left open
-            // (the head grows DOWN; the anchor is the top).
-            return config.glowBerriesEnabled;
+            // Breaking IS a harvest path here - lit vines drop their berries,
+            // and lower segments regrow from the remaining body - so only the
+            // ceiling anchor is protected: losing it kills the whole column.
+            // (3.3.0 protected the plant outright on the audit's advice that
+            // right-click was the only harvest; that missed the berry drop
+            // and blocked harvesting entirely.)
+            Block above = level.getBlockState(pos.above()).getBlock();
+            return config.glowBerriesEnabled
+                    && above != Blocks.CAVE_VINES && above != Blocks.CAVE_VINES_PLANT;
         }
         if (block == Blocks.PALE_HANGING_MOSS) {
-            return config.paleMossEnabled;
+            // Collecting moss means breaking segments; protect the anchor only.
+            return config.paleMossEnabled
+                    && level.getBlockState(pos.above()).getBlock() != Blocks.PALE_HANGING_MOSS;
         }
         if (block == Blocks.CACTUS) {
             return config.cactusEnabled
