@@ -262,6 +262,14 @@ public class CropModModMenuIntegration implements ModMenuApi {
                                         .setSaveConsumer(val -> config.protectBuddingAmethyst = val)
                                         .build());
 
+                        crops.addEntry(entryBuilder
+                                        .startBooleanToggle(Component.translatable("option.cropmod.protectSuspiciousBlocks"),
+                                                        config.protectSuspiciousBlocks)
+                                        .setDefaultValue(true)
+                                        .setTooltip(Component.translatable("option.cropmod.protectSuspiciousBlocks.tooltip"))
+                                        .setSaveConsumer(val -> config.protectSuspiciousBlocks = val)
+                                        .build());
+
                         // Harvest Statistics category - with LIVE PREVIEW
                         ConfigCategory stats = builder.getOrCreateCategory(Component.translatable("category.cropmod.stats"));
 
