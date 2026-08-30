@@ -134,6 +134,26 @@ public final class CropProtection {
             // gone forever if broken, drops nothing even with silk touch
             return config.protectBuddingAmethyst;
         }
+        if (config.protectSuspiciousBlocks) {
+            // Brushing is the only safe interaction; breaking one drops
+            // nothing and the artifact is gone.
+            if (block instanceof net.minecraft.world.level.block.BrushableBlock) {
+                return true;
+            }
+            // Removing a support must not let a suspicious block fall to
+            // its death either: walk up the column of gravity-affected
+            // blocks resting on this one (sand under suspicious sand, and
+            // longer chains) and protect the whole stack's foundation.
+            BlockPos above = pos.above();
+            BlockState aboveState = level.getBlockState(above);
+            while (aboveState.getBlock() instanceof net.minecraft.world.level.block.Fallable) {
+                if (aboveState.getBlock() instanceof net.minecraft.world.level.block.BrushableBlock) {
+                    return true;
+                }
+                above = above.above();
+                aboveState = level.getBlockState(above);
+            }
+        }
         return false;
     }
 

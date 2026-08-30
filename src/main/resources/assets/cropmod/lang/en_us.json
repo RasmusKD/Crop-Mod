@@ -159,5 +159,9 @@
   "option.cropmod.protectBuddingAmethyst": "Budding Amethyst",
   "option.cropmod.protectBuddingAmethyst.tooltip": "Can't be broken, it drops nothing and never comes back",
   "text.autoconfig.cropmod.option.protectBuddingAmethyst": "Protect Budding Amethyst",
-  "text.autoconfig.cropmod.option.protectBuddingAmethyst.@Tooltip": "Budding amethyst can't be broken. It drops nothing and never comes back."
+  "text.autoconfig.cropmod.option.protectBuddingAmethyst.@Tooltip": "Budding amethyst can't be broken. It drops nothing and never comes back.",
+  "option.cropmod.protectSuspiciousBlocks": "Suspicious Blocks",
+  "option.cropmod.protectSuspiciousBlocks.tooltip": "Can't be broken or dropped by mining their support, brush them instead",
+  "text.autoconfig.cropmod.option.protectSuspiciousBlocks": "Protect Suspicious Blocks",
+  "text.autoconfig.cropmod.option.protectSuspiciousBlocks.@Tooltip": "Suspicious sand and gravel can't be broken, and the blocks holding them up can't be mined out under them. Brush them instead."
 }
