@@ -39,5 +39,6 @@ class in that variant. Check each jar against the Minecraft versions it claims w
 | `InputConstants.isKeyDown` | `(Window, int)` | `(int)` | `VersionCompat.isKeyDown`, replaced in `src/mc26_3` |
 | `InputConstants.Type.KEYSYM` | exists | now `KEYBOARD` | `new KeyMapping(String, int, Category)`, exists on all three |
 | `Gui` HUD class | `Gui` (26.1) / `Hud` (26.2) | `Hud` | legacy twin dropped from the 26.3 jar |
+| Key codes (`InputConstants.KEY_*`, `KeyMapping` int argument) | GLFW keycodes (`KEY_B` 66, `KEY_LSHIFT` 340) | SDL scancodes (`KEY_B` 5, `KEY_LSHIFT` 225) | always write `InputConstants.KEY_*`, never a number; each jar inlines its own value |
 
 Full 26.3 table: `C:\Users\Rasmus\Desktop\Ny mappe (3)\mc-26.3-splits.md`.

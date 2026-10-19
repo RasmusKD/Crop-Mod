@@ -22,11 +22,11 @@ public class CropModClient implements ClientModInitializer {
     }
 
     private static boolean shiftDown(net.minecraft.client.Minecraft client) {
-        return modifierDown(client, 340, 344); // GLFW LEFT/RIGHT SHIFT
+        return modifierDown(client, InputConstants.KEY_LSHIFT, InputConstants.KEY_RSHIFT);
     }
 
     private static boolean ctrlDown(net.minecraft.client.Minecraft client) {
-        return modifierDown(client, 341, 345); // GLFW LEFT/RIGHT CONTROL
+        return modifierDown(client, InputConstants.KEY_LCONTROL, InputConstants.KEY_RCONTROL);
     }
     private static KeyMapping toggleModKeyBinding;
     private static KeyMapping toggleCameraSnapKeyBinding;
@@ -44,19 +44,19 @@ public class CropModClient implements ClientModInitializer {
         toggleModKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleMod",
-                        66, // B key
+                        InputConstants.KEY_B,
                         CROPMOD_CATEGORY));
 
         toggleCameraSnapKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleCameraSnap",
-                        79, // O key
+                        InputConstants.KEY_O,
                         CROPMOD_CATEGORY));
 
         toggleStatsKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleStats",
-                        72, // H key
+                        InputConstants.KEY_H,
                         CROPMOD_CATEGORY));
 
         // Harvest counts confirm here a few ticks after the predicted break,
