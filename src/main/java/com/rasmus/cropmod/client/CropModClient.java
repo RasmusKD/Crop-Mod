@@ -44,13 +44,13 @@ public class CropModClient implements ClientModInitializer {
         toggleModKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleMod",
-                        InputConstants.KEY_B,
+                        InputConstants.KEY_J, // B is Rare Fish Finder's collection key
                         CROPMOD_CATEGORY));
 
         toggleCameraSnapKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleCameraSnap",
-                        InputConstants.KEY_O,
+                        InputConstants.UNKNOWN.getValue(), // unbound: O is vanilla Friends from 26.2 on
                         CROPMOD_CATEGORY));
 
         toggleStatsKeyBinding = KeyMappingHelper.registerKeyMapping(

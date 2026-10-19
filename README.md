@@ -36,8 +36,8 @@ Originally built for **mcMMO** players. At Herbalism 1000, mcMMO auto-replants c
 - **Tracked crops:** Wheat, Carrots, Potatoes, Beetroots, Nether Wart, Cocoa (protection covers many more plants; the statistics track these six)
 
 ### Keybinds
-- **B**: Toggle crop protection
-- **O**: Toggle camera snap
+- **J**: Toggle crop protection (was B, which Rare Fish Finder uses)
+- Toggle camera snap: unbound by default (was O, which vanilla binds to the Friends screen from 26.2 on); bind it in Controls
 - **H**: Toggle stats HUD
 - **Shift+H**: Reset session stats
 - **Ctrl+H**: Position HUD
