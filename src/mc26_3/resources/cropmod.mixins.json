@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.rasmus.cropmod.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+  ],
+  "client": [
+    "BreakProtectionMixin",
+    "CropBlockMixin",
+    "HarvestTrackerMixin",
+    "HudStatsModernMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "plugin": "com.rasmus.cropmod.CropModMixinPlugin"
+}

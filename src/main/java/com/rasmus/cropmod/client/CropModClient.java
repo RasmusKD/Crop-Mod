@@ -12,37 +12,13 @@ import net.minecraft.resources.Identifier;
 
 public class CropModClient implements ClientModInitializer {
 
-    // 26.1 exposes the current screen as the public field Minecraft.screen,
-    // 26.2 as the method Minecraft.screen(). A direct reference to either is
-    // a NoSuchFieldError/NoSuchMethodError on the other version, so the
-    // lookup happens once by name (same pattern as Rare Fish Finder 2.5.3).
-    private static java.lang.reflect.Method screenMethod;
-    private static java.lang.reflect.Field screenField;
-    private static boolean screenLookupFailed;
-
     public static net.minecraft.client.gui.screens.Screen currentScreen(net.minecraft.client.Minecraft client) {
-        if (screenLookupFailed) {
-            return null;
-        }
-        try {
-            if (screenMethod == null && screenField == null) {
-                try {
-                    screenMethod = net.minecraft.client.Minecraft.class.getMethod("screen");
-                } catch (NoSuchMethodException e) {
-                    screenField = net.minecraft.client.Minecraft.class.getField("screen");
-                }
-            }
-            Object result = screenMethod != null ? screenMethod.invoke(client) : screenField.get(client);
-            return (net.minecraft.client.gui.screens.Screen) result;
-        } catch (ReflectiveOperationException e) {
-            screenLookupFailed = true;
-            return null;
-        }
+        return VersionCompat.currentScreen(client);
     }
 
     private static boolean modifierDown(net.minecraft.client.Minecraft client, int left, int right) {
-        return InputConstants.isKeyDown(client.getWindow(), left)
-                || InputConstants.isKeyDown(client.getWindow(), right);
+        return VersionCompat.isKeyDown(client, left)
+                || VersionCompat.isKeyDown(client, right);
     }
 
     private static boolean shiftDown(net.minecraft.client.Minecraft client) {
@@ -68,21 +44,18 @@ public class CropModClient implements ClientModInitializer {
         toggleModKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleMod",
-                        InputConstants.Type.KEYSYM,
                         66, // B key
                         CROPMOD_CATEGORY));
 
         toggleCameraSnapKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleCameraSnap",
-                        InputConstants.Type.KEYSYM,
                         79, // O key
                         CROPMOD_CATEGORY));
 
         toggleStatsKeyBinding = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.cropmod.toggleStats",
-                        InputConstants.Type.KEYSYM,
                         72, // H key
                         CROPMOD_CATEGORY));
 
