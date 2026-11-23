@@ -65,3 +65,6 @@ target/
 # Temporary files
 *.tmp
 *.temp
+# Local run files
+*.launch
+build_log.txt

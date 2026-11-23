@@ -30,7 +30,7 @@ produces `Cropmod-X.Y.Z+26.3.jar` (pins in `gradle-26.3.properties`). Files unde
 `src/mc26_3/resources` replace the same-named file of `src/main`; `src/mc26_3/remove.txt` lists main
 files the 26.3 jar drops. `verifyMixinClasses` (part of `check`) fails when a mixins.json entry has no
 class in that variant. Check each jar against the Minecraft versions it claims without starting the game:
-`python C:\Users\Rasmus\.claude\skills\minecraft-mods\scripts\linkcheck.py <jar> <mapped minecraft jar>`
+`python <minecraft-mods skill>/scripts/linkcheck.py <jar> <mapped minecraft jar>`
 (plugin-gated twins report as missing on the other version; that is expected).
 
 | What | 26.1/26.2 | 26.3 | Fix |
@@ -41,4 +41,4 @@ class in that variant. Check each jar against the Minecraft versions it claims w
 | `Gui` HUD class | `Gui` (26.1) / `Hud` (26.2) | `Hud` | legacy twin dropped from the 26.3 jar |
 | Key codes (`InputConstants.KEY_*`, `KeyMapping` int argument) | GLFW keycodes (`KEY_B` 66, `KEY_LSHIFT` 340) | SDL scancodes (`KEY_B` 5, `KEY_LSHIFT` 225) | always write `InputConstants.KEY_*`, never a number; each jar inlines its own value |
 
-Full 26.3 table: `C:\Users\Rasmus\Desktop\Ny mappe (3)\mc-26.3-splits.md`.
+Full 26.3 table: kept with the `minecraft-mods` skill.
